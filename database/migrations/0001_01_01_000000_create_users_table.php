@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('no_hp')->unique();
-            // $table->enum('jabatan', ['Pimpinan, Staff, Karyawan - Pelapor, Karyawan - Biasa']);
             $table->enum('jabatan', [
                 'Pimpinan',
                 'Staff',
