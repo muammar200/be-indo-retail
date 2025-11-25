@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('hari_kerja', function (Blueprint $table) {
-            //
+        Schema::create('hari_kerja', function (Blueprint $table) {
+            $table->id();
+            $table->date('work_date');
+            $table->enum('day_name', ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']);
+            $table->char('month_year', 7);
+            $table->timestamps();
         });
     }
 
