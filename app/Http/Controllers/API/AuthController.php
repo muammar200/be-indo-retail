@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
 {
@@ -59,5 +60,16 @@ class AuthController extends Controller
                 "message" => $th->getMessage(),
             ], 500);
         }
+    }
+
+    public function me(Request $request)
+    {
+        $data = [
+            'status' => true,
+            'message' => 'Get Authenticated User Success',
+            'data' => new UserResource($request->user()),
+        ];
+
+        return response()->json($data, 200);
     }
 }
