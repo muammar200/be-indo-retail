@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\MetaPaginateResource;
+use App\Http\Resources\PermintaanBarangResource;
+use App\Http\Resources\StokResource;
+use App\Models\PermintaanBarang;
+use App\Models\Stok;
+use Illuminate\Http\Request;
+
+class StokController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $page = $request->input('page', 1);
+        $perpage = $request->input('perpage', 10);
+        $search = $request->input('search', '');
+
+        $stok = Stok::latest()->where('nama', 'LIKE', "%$search%")->orWhere('kode_barang', 'LIKE', "%$search%")->orWhere('harga', 'LIKE', "%$search%")->orWhere('stok_awal', 'LIKE', "%$search%")->orWhere('stok_total', 'LIKE', "%$search%")->orWhere('tanggal_masuk', 'LIKE', "%$search%")->orWhere('tanggal_update', 'LIKE', "%$search%")->orWhere('sub_kategori', 'LIKE', "%$search%")->paginate($perpage, ['*'], 'page', $page);
+
+        $data = [
+            'status' => true,
+            'message' => 'Show Stok Success',
+            'meta' => new MetaPaginateResource($stok),
+            'data' => StokResource::collection($stok),
+        ];
+
+        return response()->json($data, 200);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Stok $stok)
+    {
+        $data = [
+            'status' => true,
+            'message' => 'Get Stok by Id',
+            'data' => new StokResource($stok),
+        ];
+
+        return response()->json($data, 200);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+
+    public function cetakStok()
+    {
+        $stok = Stok::where('stok_total', '>', 0)->get();
+
+        $data = [
+            'status' => true,
+            'message' => 'Cetak Stok Success',
+            'data' => StokResource::collection($stok),
+        ];
+
+        return response()->json($data, 200);
+    }
+
+    public function permintaanStok(Request $request)
+    {
+        $validatedData = $request->validate([
+            'stok_id' => 'required|exists:stok,id',
+            'tanggal_permintaan' => 'required|date',
+            'jumlah_permintaan' => 'required|integer',
+            'modal' => 'required|numeric',
+            'nomor_npwp' => 'required|string',
+        ]);
+
+        $permintaanBarang = PermintaanBarang::create([
+            'nama_barang' => Stok::find($validatedData['stok_id'])->nama,
+            'tanggal_permintaan' => $validatedData['tanggal_permintaan'],
+            'jumlah_permintaan' => $validatedData['jumlah_permintaan'],
+            'modal' => $validatedData['modal'],
+            'nomor_npwp' => $validatedData['nomor_npwp'],
+        ]);
+
+        $data = [
+            'status' => true,
+            'message' => 'Create Permintaan Barang Success',
+            'data' => new PermintaanBarangResource($permintaanBarang),
+        ];
+
+        return response()->json($data, 201);
+    }
+}
