@@ -33,4 +33,5 @@ Route::prefix('admin')->group(function () {
     Route::post('permintaanStok', [StokController::class, 'permintaanStok']);
     Route::apiResource('laporanBarangKeluar', LaporanBarangKeluarController::class);
     Route::apiResource('permintaanBarang', PermintaanBarangController::class);
+    Route::get('cetakPermintaanBarang', [PermintaanBarangController::class, 'cetakPermintaanBarang']);
 });
