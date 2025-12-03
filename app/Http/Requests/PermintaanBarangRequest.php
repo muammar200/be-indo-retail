@@ -29,4 +29,20 @@ class PermintaanBarangRequest extends FormRequest
             'nomor_npwp' => 'required|string',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'nama_barang.required' => 'Nama barang harus diisi.',
+            'nama_barang.string' => 'Nama barang harus berupa teks.',
+            'tanggal_permintaan.required' => 'Tanggal permintaan harus diisi.',
+            'tanggal_permintaan.date' => 'Tanggal permintaan harus dalam format yang valid.',
+            'jumlah_permintaan.required' => 'Jumlah permintaan harus diisi.',
+            'jumlah_permintaan.integer' => 'Jumlah permintaan harus berupa angka bulat.',
+            'modal.required' => 'Modal harus diisi.',
+            'modal.numeric' => 'Modal harus berupa angka.',
+            'nomor_npwp.required' => 'Nomor NPWP harus diisi.',
+            'nomor_npwp.string' => 'Nomor NPWP harus berupa teks.',
+        ];
+    }
 }

@@ -38,4 +38,21 @@ class UserRequest extends FormRequest
 
         return $rules;
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Nama harus diisi.',
+            'name.string' => 'Nama harus berupa teks.',
+            'name.max' => 'Nama tidak boleh lebih dari 255 karakter.',
+            'no_hp.required' => 'Nomor handphone harus diisi.',
+            'no_hp.unique' => 'Nomor handphone sudah terdaftar.',
+            'jabatan.required' => 'Jabatan harus diisi.',
+            'jabatan.in' => 'Jabatan yang dimasukkan tidak valid. Pilih salah satu dari: Pimpinan, Staff, Karyawan Pelapor, Karyawan Biasa.',
+            'password.required' => 'Password harus diisi.',
+            'password.string' => 'Password harus berupa teks.',
+            'password.min' => 'Password harus terdiri dari minimal 8 karakter.',
+            'password.nullable' => 'Password dapat dikosongkan.',
+        ];
+    }
 }

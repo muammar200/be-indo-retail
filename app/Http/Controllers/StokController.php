@@ -91,6 +91,17 @@ class StokController extends Controller
             'jumlah_permintaan' => 'required|integer',
             'modal' => 'required|numeric',
             'nomor_npwp' => 'required|string',
+        ], [
+            'stok_id.required' => 'ID stok harus diisi.',
+            'stok_id.exists' => 'Stok dengan ID yang diberikan tidak ditemukan.',
+            'tanggal_permintaan.required' => 'Tanggal permintaan harus diisi.',
+            'tanggal_permintaan.date' => 'Tanggal permintaan harus berupa format tanggal yang valid.',
+            'jumlah_permintaan.required' => 'Jumlah permintaan harus diisi.',
+            'jumlah_permintaan.integer' => 'Jumlah permintaan harus berupa angka bulat.',
+            'modal.required' => 'Modal harus diisi.',
+            'modal.numeric' => 'Modal harus berupa angka.',
+            'nomor_npwp.required' => 'Nomor NPWP harus diisi.',
+            'nomor_npwp.string' => 'Nomor NPWP harus berupa string.',
         ]);
 
         $permintaanBarang = PermintaanBarang::create([
