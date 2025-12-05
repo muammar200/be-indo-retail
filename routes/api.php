@@ -18,6 +18,7 @@ Route::middleware(['auth:api', 'jabatan:Staff'])->get('/tes', function (Request 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware(['auth:api']);
 Route::get('/me', [AuthController::class, 'me'])->middleware(['auth:api']);
+Route::post('/forgot-password/send-otp', [AuthController::class, 'sendOtp']);
 
 // Route::prefix('admin')->middleware('auth:api')->group(function(){
 //     Route::apiResource('users', UserController::class);
@@ -27,6 +28,7 @@ Route::prefix('admin')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('barangMasuk', BarangMasukController::class);
     Route::apiResource('laporanBarangMasuk', LaporanBarangMasukController::class);
+    Route::post('cetakLaporanBarangMasuk', [LaporanBarangMasukController::class, 'cetakLaporanBarangMasuk']);
     Route::apiResource('barangKeluar', BarangKeluarController::class);
     Route::apiResource('stok', StokController::class);
     Route::get('cetakStok', [StokController::class, 'cetakStok']);
