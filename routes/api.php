@@ -30,6 +30,7 @@ Route::prefix('admin')->group(function () {
     Route::apiResource('laporanBarangMasuk', LaporanBarangMasukController::class);
     Route::post('cetakLaporanBarangMasuk', [LaporanBarangMasukController::class, 'cetakLaporanBarangMasuk']);
     Route::apiResource('barangKeluar', BarangKeluarController::class);
+        Route::post('cetakLaporanBarangKeluar', [LaporanBarangKeluarController::class, 'cetakLaporanBarangKeluar']);
     Route::apiResource('stok', StokController::class);
     Route::get('cetakStok', [StokController::class, 'cetakStok']);
     Route::post('permintaanStok', [StokController::class, 'permintaanStok']);
