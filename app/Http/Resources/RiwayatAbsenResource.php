@@ -19,9 +19,10 @@ class RiwayatAbsenResource extends JsonResource
 
         return [
             'tanggal' => $tanggalDenganHari,
-            'waktu_checkin' => $this->waktu_checkin,
-            'waktu_checkout' => $this->waktu_checkout,
+            'waktu_checkin' => $this->waktu_checkin ? $this->waktu_checkin : '-',
+            'waktu_checkout' => $this->waktu_checkout ? $this->waktu_checkout : '-',
             'izin_sakit' => $this->image_proof ? $this->status : '-',
+            'status' => $this->status === 'Menunggu Konfirmasi' ? '-' : $this->status,
         ];
     }
 }
