@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\IzinSakitRequest;
 use App\Http\Resources\Absensi\ClockInResource;
 use App\Http\Resources\Absensi\ClockOutResource;
+use App\Http\Resources\MetaPaginateResource;
 use App\Http\Resources\RiwayatAbsenResource;
 use App\Models\Absensi;
 use Illuminate\Http\Request;
@@ -29,8 +30,8 @@ class AbsensiController extends Controller
             $userLatitude = $request->input('latitude');
             $userLongitude = $request->input('longitude');
 
-            $officeLatitude = -5.2052646; 
-            $officeLongitude = 119.4948216;  
+            $officeLatitude = -5.2052646;
+            $officeLongitude = 119.4948216;
 
             // Maks jarak (meter)
             $maxDistance = 1000;
@@ -112,9 +113,8 @@ class AbsensiController extends Controller
             $userLatitude = $request->input('latitude');
             $userLongitude = $request->input('longitude');
 
-          
-            $officeLatitude = -5.2052646;  
-            $officeLongitude = 119.4948216;  
+            $officeLatitude = -5.2052646;
+            $officeLongitude = 119.4948216;
 
             // Maks jarak (meter)
             $maxDistance = 1000;
@@ -167,12 +167,12 @@ class AbsensiController extends Controller
                 'status' => 'Menunggu Konfirmasi',
             ];
 
-            //store image proof
+            // store image proof
             if ($request->hasFile('image_proof')) {
                 $image = $request->file('image_proof');
-                $imageName = time() . '_' . $image->getClientOriginalName();
+                $imageName = time().'_'.$image->getClientOriginalName();
                 $image->move(public_path('uploads/absensi'), $imageName);
-                $userAbsensi['image_proof'] = 'uploads/absensi/' . $imageName;
+                $userAbsensi['image_proof'] = 'uploads/absensi/'.$imageName;
             }
 
             Absensi::create($userAbsensi);
@@ -198,17 +198,35 @@ class AbsensiController extends Controller
             $month = date('m');
             $year = date('Y');
 
+            $page = $request->input('page', 1);
+            $perpage = $request->input('perpage', 10);
+            $search = $request->input('search', '');
+
             $absensiRecords = Absensi::where('user_id', $request->user()->id)
                 ->whereYear('tanggal', $year)
-                ->whereMonth('tanggal', $month)
-                ->orderBy('tanggal')
-                ->get();
+                ->whereMonth('tanggal', $month);
 
-            return response()->json([
+            if ($search) {
+                $absensiRecords = $absensiRecords->where(function ($query) use ($search) {
+                    $query->where('tanggal', 'like', '%'.$search.'%')
+                        ->orWhere('status', 'like', '%'.$search.'%')
+                        ->orWhere('keterangan', 'like', '%'.$search.'%')
+                        ->orWhere('waktu_checkin', 'like', '%'.$search.'%')
+                        ->orWhere('waktu_checkout', 'like', '%'.$search.'%');
+                });
+            }
+
+            $absensiRecords = $absensiRecords->orderBy('tanggal')
+                ->paginate($perpage, ['*'], 'page', $page);
+
+            $data = [
                 'status' => true,
                 'message' => 'Riwayat Absen on Month Retrieved Successfully',
+                'meta' => new MetaPaginateResource($absensiRecords),
                 'data' => RiwayatAbsenResource::collection($absensiRecords),
-            ], 200);
+            ];
+
+            return response()->json($data, 200);
 
         } catch (\Throwable $th) {
             return response()->json([
@@ -216,12 +234,12 @@ class AbsensiController extends Controller
                 'message' => $th->getMessage(),
             ], 500);
         }
-    }
 
+    }
 
     private function calculateDistance($latitude1, $longitude1, $latitude2, $longitude2)
     {
-        $earthRadius = 6371000; 
+        $earthRadius = 6371000;
 
         $latFrom = deg2rad($latitude1);
         $lonFrom = deg2rad($longitude1);
