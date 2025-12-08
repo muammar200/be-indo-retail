@@ -27,6 +27,12 @@ Route::post('/absensi/clock-out', [AbsensiController::class, 'clockOut'])->middl
 Route::post('/absensi/izin-sakit', [AbsensiController::class, 'izinSakit'])->middleware(['auth:api']);
 Route::get('/absensi/history', [AbsensiController::class, 'riwayatAbsenByBulan'])->middleware(['auth:api']);
 
+Route::get('/data-absensi/on-day', [App\Http\Controllers\API\DataAbsensiController::class, 'absensiOnDay']);
+Route::get('/data-absensi/on-day/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'absensiById']);
+Route::get('/data-absensi/bukti-izin-sakit/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'buktiIzinSakit']);
+Route::patch('/data-absensi/update-status/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'updateStatusAbsensi']);
+Route::get('/data-absensi/rekap-absensi-by-bulan', [App\Http\Controllers\API\DataAbsensiController::class, 'rekapAbsensiByBulan']);
+
 Route::get('/dashboard/chart', [App\Http\Controllers\API\DashboardController::class, 'chart']);
 Route::get('/dashboard', [App\Http\Controllers\API\DashboardController::class, 'dashboard']);
 

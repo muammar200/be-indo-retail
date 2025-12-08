@@ -168,12 +168,10 @@ class AbsensiController extends Controller
             ];
 
             // store image proof
-            if ($request->hasFile('image_proof')) {
-                $image = $request->file('image_proof');
-                $imageName = time().'_'.$image->getClientOriginalName();
-                $image->move(public_path('uploads/absensi'), $imageName);
-                $userAbsensi['image_proof'] = 'uploads/absensi/'.$imageName;
-            }
+            $imagePath = $request->file('image_proof')->store('images/absensi', 'public');
+            $imageFileName = basename($imagePath);
+
+            $userAbsensi['image_proof'] = $imageFileName;
 
             Absensi::create($userAbsensi);
 
