@@ -27,6 +27,7 @@ class UserRequest extends FormRequest
             'no_hp' => [
                 'required',
                 Rule::unique('users', 'no_hp')->ignore($this->route('user')),
+                'regex:/^62\d{8,15}$/', 
             ],
             'jabatan' => ['required', 'in:Pimpinan,Staff,Karyawan - Pelapor,Karyawan - Biasa'],
             'password' => ['required', 'string', 'min:8'],
@@ -47,6 +48,7 @@ class UserRequest extends FormRequest
             'name.max' => 'Nama tidak boleh lebih dari 255 karakter.',
             'no_hp.required' => 'Nomor handphone harus diisi.',
             'no_hp.unique' => 'Nomor handphone sudah terdaftar.',
+            'no_hp.regex' => 'Nomor handphone harus dimulai dengan 62 dan terdiri dari 8 hingga 15 digit.',
             'jabatan.required' => 'Jabatan harus diisi.',
             'jabatan.in' => 'Jabatan yang dimasukkan tidak valid. Pilih salah satu dari: Pimpinan, Staff, Karyawan Pelapor, Karyawan Biasa.',
             'password.required' => 'Password harus diisi.',

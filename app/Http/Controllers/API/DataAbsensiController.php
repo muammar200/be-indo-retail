@@ -79,10 +79,10 @@ class DataAbsensiController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:Hadir,Izin,Sakit,Terlambat,Hadir(Tidak Absen Pulang),Tidak Disetujui',
+            'status' => 'required|in:Hadir,Terlambat',
         ], [
             'status.required' => 'Status harus diisi.',
-            'status.in' => 'Status yang dipilih tidak valid. Pilih salah satu dari: Hadir, Izin, Sakit, Terlambat, Hadir (Tidak Absen Pulang), atau Tidak Disetujui.',
+            'status.in' => 'Status yang dipilih tidak valid. Pilih salah satu dari: Hadir,Terlambat',
         ]);
 
         $absensi->status = $request->input('status');
@@ -117,6 +117,41 @@ class DataAbsensiController extends Controller
             'status' => true,
             'message' => 'Bukti izin/sakit ditemukan',
             'data' => new BuktiResource($absensi),
+        ]);
+    }
+
+    public function approveIzinSakit(Request $request, $id)
+    {
+        $absensi = Absensi::find($id);
+
+        if (! $absensi) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Data absensi tidak ditemukan',
+            ], 404);
+        }
+
+        if ($absensi->status !== 'Menunggu Konfirmasi') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Absensi ini sudah diproses sebelumnya.',
+            ], 400);
+        }
+
+        $request->validate([
+            'status' => 'required|in:Izin,Sakit,Tidak Disetujui',
+        ], [
+            'status.required' => 'Status harus diisi.',
+            'status.in' => 'Status yang dipilih tidak valid. Pilih salah satu dari: Izin, Sakit, atau Tidak Disetujui.',
+        ]);
+
+        $absensi->status = $request->input('status');
+        $absensi->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Izin/sakit disetujui.',
+            'data' => new UbahStatusResource($absensi),
         ]);
     }
 
