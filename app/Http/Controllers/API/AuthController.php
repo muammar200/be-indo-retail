@@ -7,6 +7,8 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\FonnteService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -79,39 +81,6 @@ class AuthController extends Controller
         return response()->json($data, 200);
     }
 
-    // public function sendOtp(Request $request)
-    // {
-    //     try {
-    //         $request->validate([
-    //             'whatsapp' => 'required',
-    //         ]);
-
-    //         $user = User::where('no_hp', $request->whatsapp)->first();
-
-    //         if (! $user) {
-    //             return response()->json(['message' => 'Nomor WhatsApp tidak terdaftar'], 404);
-    //         }
-
-    //         $otp = rand(100000, 999999);
-
-    //         // Kirim WhatsApp
-    //         FonnteService::send(
-    //             $request->whatsapp,
-    //             "Kode OTP kamu adalah: $otp (berlaku 5 menit)"
-    //         );
-
-    //         return response()->json([
-    //             'message' => 'OTP berhasil dikirim!',
-    //             'otp' => $otp, // biasanya tidak ditampilkan ke frontend
-    //         ]);
-    //     } catch (\Throwable $th) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => $th->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
     public function sendOtp(Request $request)
     {
         try {
@@ -119,10 +88,7 @@ class AuthController extends Controller
                 'whatsapp' => 'required',
             ]);
 
-            // Normalisasi nomor (08123 → 628123)
             $wa = $this->normalizeWa($request->whatsapp);
-
-            // CARI USER BERDASARKAN NO HP
             $user = User::where('no_hp', $wa)->first();
 
             if (! $user) {
@@ -132,32 +98,136 @@ class AuthController extends Controller
                 ], 404);
             }
 
-            // Generate OTP
             $otp = rand(100000, 999999);
 
-            // Simpan OTP ke database
-            // $user->update([
-            //     'otp' => $otp,
-            //     'otp_expires_at' => now()->addMinutes(5),
-            // ]);
+            $user->update([
+                'otp' => $otp,
+                'otp_expires_at' => now()->addMinutes(5),
+            ]);
 
-            // Kirim WhatsApp via Fonnte
-            $res = FonnteService::send($wa, "Kode OTP kamu adalah: $otp (berlaku 5 menit)");
+            $user = User::where('no_hp', $wa)->first();
 
-            // Bisa cek response dari Fonnte
-            if (! isset($res['status']) || $res['status'] != true) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Gagal mengirim pesan WhatsApp',
-                    'detail' => $res,
-                ], 500);
-            }
+            // set throttle cache (simpan expiry timestamp agar response dapat beri retry_after)
+            $cacheKey = "otp_throttle:{$wa}";
+            Cache::put($cacheKey, now()->addMinutes(5)->timestamp, 300); // 300 detik
+
+            // $res = FonnteService::send($wa, "Kode OTP kamu adalah: $otp (berlaku 5 menit)");
+
+            // if (! isset($res['status']) || $res['status'] != true) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'Gagal mengirim pesan WhatsApp',
+            //         // 'detail' => $res,
+            //     ], 500);
+            // }
 
             return response()->json([
                 'status' => true,
                 'message' => 'OTP berhasil dikirim!',
             ]);
 
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        try {
+            $request->validate([
+                'otp' => 'required',
+            ]);
+
+            // $user = User::where('otp', $request->no_hp)->first();
+            $user = User::where('otp', $request->otp)->first();
+
+            if (! $user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Kode OTP salah',
+                ], 404);
+            }
+
+            // if ($user->otp !== $request->otp) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'OTP salah',
+            //     ], 400);
+            // }
+
+            if (now()->greaterThan($user->otp_expires_at)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'OTP kadaluarsa',
+                ], 400);
+            }
+
+            // generate temporary token untuk reset password
+            $token = Str::random(64);
+            $cacheKey = "password_reset_token:{$token}";
+
+            // simpan mapping token -> whatsapp (15 menit)
+            Cache::put($cacheKey, $user->no_hp, 900); // 900 detik = 15 menit
+
+            return response()->json([
+                'status' => true,
+                'message' => 'OTP valid',
+                'password_reset_token' => $token,
+                'expires_in_seconds' => 900,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function resetPassword(Request $request)
+    {
+        try {
+            $request->validate([
+                'password_reset_token' => 'required',
+                'password' => 'required|min:8|confirmed',
+            ]);
+
+            $token = $request->password_reset_token;
+            $cacheKey = "password_reset_token:{$token}";
+
+            if (! Cache::has($cacheKey)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Token tidak valid atau telah kedaluwarsa',
+                ], 400);
+            }
+
+            $wa = Cache::get($cacheKey);
+
+            $user = User::where('no_hp', $wa)->first();
+
+            if (! $user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User tidak ditemukan',
+                ], 404);
+            }
+
+            $user->update([
+                'password' => $request->password,
+                'otp' => null,
+                'otp_expires_at' => null,
+            ]);
+
+            // hapus token dari cache
+            Cache::forget($cacheKey);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Password berhasil direset',
+            ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,

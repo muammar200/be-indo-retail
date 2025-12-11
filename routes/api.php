@@ -20,7 +20,10 @@ Route::middleware(['auth:api', 'jabatan:Staff'])->get('/tes', function (Request 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware(['auth:api']);
 Route::get('/me', [AuthController::class, 'me'])->middleware(['auth:api']);
-Route::post('/forgot-password/send-otp', [AuthController::class, 'sendOtp']);
+
+Route::post('/forgot-password/send-otp', [AuthController::class, 'sendOtp'])->middleware(['otp.throttle']);
+Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyOtp']);
+Route::post('/forgot-password/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::post('/absensi/clock-in', [AbsensiController::class, 'clockIn'])->middleware(['auth:api']);
 Route::post('/absensi/clock-out', [AbsensiController::class, 'clockOut'])->middleware(['auth:api']);

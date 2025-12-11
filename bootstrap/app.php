@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'jabatan' => \App\Http\Middleware\CheckJabatan::class,
+            'otp.throttle' => \App\Http\Middleware\OtpThrottleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
