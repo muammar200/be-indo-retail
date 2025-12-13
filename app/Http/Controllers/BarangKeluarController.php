@@ -7,6 +7,7 @@ use App\Http\Resources\BarangKeluarResource;
 use App\Http\Resources\MetaPaginateResource;
 use App\Models\BarangKeluar;
 use App\Models\Stok;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -38,6 +39,8 @@ class BarangKeluarController extends Controller
      */
     public function store(BarangKeluarRequest $request)
     {
+        $validatedData = $request->validated();
+        $validatedData['tanggal_keluar'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_keluar'])->format('Y-m-d');
 
         try {
             // Begin the transaction
@@ -56,7 +59,7 @@ class BarangKeluarController extends Controller
                 'harga' => $stok->harga,
                 'jumlah' => $request->jumlah,
                 'sub_kategori' => $stok->sub_kategori,
-                'tanggal_keluar' => $request->tanggal_keluar,
+                'tanggal_keluar' => $validatedData['tanggal_keluar'],
                 'toko_tujuan' => $request->toko_tujuan,
             ]);
 
@@ -86,8 +89,9 @@ class BarangKeluarController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BarangKeluar $barangKeluar)
+    public function show($id)
     {
+        $barangKeluar = BarangKeluar::find($id);
         $data = [
             'status' => true,
             'message' => 'Get Barang Keluar by Id',
@@ -100,8 +104,11 @@ class BarangKeluarController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(BarangKeluarRequest $request, BarangKeluar $barangKeluar)
+    public function update(BarangKeluarRequest $request, $id)
     {
+        $barangKeluar = BarangKeluar::find($id);
+        $validatedData = $request->validated();
+        $validatedData['tanggal_keluar'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_keluar'])->format('Y-m-d');
         try {
             DB::beginTransaction();
             $stok = Stok::where('kode_barang', $barangKeluar->kode_barang)->first();
@@ -114,7 +121,7 @@ class BarangKeluarController extends Controller
 
             $barangKeluar->update([
                 'jumlah' => $request->jumlah,
-                'tanggal_keluar' => $request->tanggal_keluar,
+                'tanggal_keluar' => $validatedData['tanggal_keluar'],
                 'toko_tujuan' => $request->toko_tujuan,
             ]);
 
@@ -140,8 +147,9 @@ class BarangKeluarController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BarangKeluar $barangKeluar)
+    public function destroy($id)
     {
+        $barangKeluar = BarangKeluar::find($id);
         try {
             DB::beginTransaction();
 

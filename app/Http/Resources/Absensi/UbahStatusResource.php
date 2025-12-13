@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Absensi;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,7 +18,8 @@ class UbahStatusResource extends JsonResource
         return [
             'id' => $this->id,
             'user' => $this->user->name,
-            'tanggal' => $this->tanggal,
+            // 'tanggal' => $this->tanggal,
+            'tanggal' => Carbon::parse($this->tanggal)->format('d-m-Y'),
             'status' => $this->status,
         ];
     }

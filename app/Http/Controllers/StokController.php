@@ -7,6 +7,7 @@ use App\Http\Resources\PermintaanBarangResource;
 use App\Http\Resources\StokResource;
 use App\Models\PermintaanBarang;
 use App\Models\Stok;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class StokController extends Controller
@@ -32,6 +33,19 @@ class StokController extends Controller
         return response()->json($data, 200);
     }
 
+    public function allStok()
+    {
+        $stok = Stok::latest()->get();
+
+        $data = [
+            'status' => true,
+            'message' => 'Show Stok Success For Dropdwon',
+            'data' => StokResource::collection($stok),
+        ];
+
+        return response()->json($data, 200);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -43,8 +57,9 @@ class StokController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Stok $stok)
+    public function show($id)
     {
+        $stok = Stok::find($id);
         $data = [
             'status' => true,
             'message' => 'Get Stok by Id',
@@ -87,7 +102,7 @@ class StokController extends Controller
     {
         $validatedData = $request->validate([
             'stok_id' => 'required|exists:stok,id',
-            'tanggal_permintaan' => 'required|date',
+            'tanggal_permintaan' => 'required|date_format:d-m-Y',
             'jumlah_permintaan' => 'required|integer',
             'modal' => 'required|numeric',
             'nomor_npwp' => 'required|string',
@@ -95,7 +110,7 @@ class StokController extends Controller
             'stok_id.required' => 'ID stok harus diisi.',
             'stok_id.exists' => 'Stok dengan ID yang diberikan tidak ditemukan.',
             'tanggal_permintaan.required' => 'Tanggal permintaan harus diisi.',
-            'tanggal_permintaan.date' => 'Tanggal permintaan harus berupa format tanggal yang valid.',
+            'tanggal_permintaan.date_format' => 'Tanggal masuk barang harus menggunakan format dd-mm-yyyy.',
             'jumlah_permintaan.required' => 'Jumlah permintaan harus diisi.',
             'jumlah_permintaan.integer' => 'Jumlah permintaan harus berupa angka bulat.',
             'modal.required' => 'Modal harus diisi.',
@@ -106,7 +121,8 @@ class StokController extends Controller
 
         $permintaanBarang = PermintaanBarang::create([
             'nama_barang' => Stok::find($validatedData['stok_id'])->nama,
-            'tanggal_permintaan' => $validatedData['tanggal_permintaan'],
+            // 'tanggal_permintaan' => $validatedData['tanggal_permintaan'],
+            'tanggal_permintaan' => Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_permintaan'])->format('Y-m-d'),
             'jumlah_permintaan' => $validatedData['jumlah_permintaan'],
             'modal' => $validatedData['modal'],
             'nomor_npwp' => $validatedData['nomor_npwp'],

@@ -23,7 +23,7 @@ class BarangKeluarRequest extends FormRequest
     {
         return [
             'barang_id' => 'required|exists:stok,id',
-            'tanggal_keluar' => 'required|date',
+            'tanggal_keluar' => 'required|date_format:d-m-Y',
             'toko_tujuan' => 'required|string',
             'jumlah' => 'required|integer|min:1',
         ];
@@ -35,7 +35,7 @@ class BarangKeluarRequest extends FormRequest
             'barang_id.required' => 'ID barang harus diisi.',
             'barang_id.exists' => 'ID barang yang dimasukkan tidak ditemukan di stok.',
             'tanggal_keluar.required' => 'Tanggal keluar barang harus diisi.',
-            'tanggal_keluar.date' => 'Tanggal keluar barang harus berupa format tanggal yang valid.',
+            'tanggal_keluar.date_format' => 'Tanggal keluar barang harus menggunakan format dd-mm-yyyy.',
             'toko_tujuan.required' => 'Toko tujuan harus diisi.',
             'toko_tujuan.string' => 'Toko tujuan harus berupa teks.',
             'jumlah.required' => 'Jumlah barang harus diisi.',

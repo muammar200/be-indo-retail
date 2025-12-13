@@ -24,15 +24,18 @@ class BarangMasukRequest extends FormRequest
         $rules = [
             'kode_barang' => 'required|string',
             'nama' => 'required|string',
-            'harga' => 'required|numeric',
+            'harga' => 'required',
             'jumlah' => 'required|integer',
             'sub_kategori' => 'required|string',
-            'tanggal_masuk' => 'required|date',
+            'tanggal_masuk' => 'required|date_format:d-m-Y',
         ];
 
         return $rules;
     }
 
+    /**
+     * Get custom error messages.
+     */
     public function messages(): array
     {
         return [
@@ -41,13 +44,12 @@ class BarangMasukRequest extends FormRequest
             'nama.required' => 'Nama barang harus diisi.',
             'nama.string' => 'Nama barang harus berupa teks.',
             'harga.required' => 'Harga barang harus diisi.',
-            'harga.numeric' => 'Harga barang harus berupa angka.',
             'jumlah.required' => 'Jumlah barang harus diisi.',
             'jumlah.integer' => 'Jumlah barang harus berupa angka bulat.',
             'sub_kategori.required' => 'Sub kategori barang harus diisi.',
             'sub_kategori.string' => 'Sub kategori barang harus berupa teks.',
             'tanggal_masuk.required' => 'Tanggal masuk barang harus diisi.',
-            'tanggal_masuk.date' => 'Tanggal masuk barang harus berupa format tanggal yang valid.',
+            'tanggal_masuk.date_format' => 'Tanggal masuk barang harus menggunakan format dd-mm-yyyy.',
         ];
     }
 }

@@ -29,7 +29,7 @@ class UserRequest extends FormRequest
                 Rule::unique('users', 'no_hp')->ignore($this->route('user')),
                 'regex:/^62\d{8,15}$/', 
             ],
-            'jabatan' => ['required', 'in:Pimpinan,Staff,Karyawan - Pelapor,Karyawan - Biasa'],
+            'jabatan' => ['required', 'in:Pimpinan,Staff,Karyawan Pelapor,Karyawan Biasa'],
             'password' => ['required', 'string', 'min:8'],
         ];
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,11 +18,11 @@ class BarangMasukResource extends JsonResource
         return [
             'id' => $this->id,
             'kode_barang' => $this->kode_barang,
-            'nama' => $this->jumlah,
+            'nama' => $this->nama,
             'harga' => $this->harga,
             'jumlah' => $this->jumlah,
             'sub_kategori' => $this->sub_kategori,
-            'tanggal_masuk' => $this->tanggal_masuk,
+            'tanggal_masuk' => Carbon::parse($this->tanggal_masuk)->format('d-m-Y'),
         ];
     }
 }

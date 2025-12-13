@@ -42,8 +42,9 @@ class LaporanBarangMasukController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BarangMasuk $laporanBarangMasuk)
+    public function show($id)
     {
+        $laporanBarangMasuk = BarangMasuk::find($id);
         $data = [
             'status' => true,
             'message' => 'Show Laporan Barang Masuk Success',

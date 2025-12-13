@@ -7,6 +7,7 @@ use App\Http\Requests\PermintaanBarangRequest;
 use App\Http\Resources\MetaPaginateResource;
 use App\Http\Resources\PermintaanBarangResource;
 use App\Models\PermintaanBarang;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PermintaanBarangController extends Controller
@@ -37,9 +38,11 @@ class PermintaanBarangController extends Controller
      */
     public function store(PermintaanBarangRequest $request)
     {
+        $validatedData = $request->validated();
+        $validatedData['tanggal_permintaan'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_permintaan'])->format('Y-m-d');
         try {
 
-            $permintaanBarang = PermintaanBarang::create($request->validated());
+            $permintaanBarang = PermintaanBarang::create($validatedData);
 
             $data = [
                 'status' => true,
@@ -59,8 +62,9 @@ class PermintaanBarangController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PermintaanBarang $permintaanBarang)
+    public function show($id)
     {
+        $permintaanBarang = PermintaanBarang::find($id);
         $data = [
             'status' => true,
             'message' => 'Get Permintaan Barang by Id',
@@ -73,11 +77,14 @@ class PermintaanBarangController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(PermintaanBarangRequest $request, PermintaanBarang $permintaanBarang)
+    public function update(PermintaanBarangRequest $request, $id)
     {
+        $validatedData = $request->validated();
+        $validatedData['tanggal_permintaan'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_permintaan'])->format('Y-m-d');
+        $permintaanBarang = PermintaanBarang::find($id);
         try {
 
-            $permintaanBarang->update($request->validated());
+            $permintaanBarang->update($validatedData);
 
             $data = [
                 'status' => true,
@@ -97,8 +104,9 @@ class PermintaanBarangController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PermintaanBarang $permintaanBarang)
+    public function destroy($id)
     {
+        $permintaanBarang = PermintaanBarang::find($id);
         try {
             $permintaanBarang->delete();
 

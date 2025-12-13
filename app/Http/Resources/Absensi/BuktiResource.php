@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Absensi;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,9 +18,10 @@ class BuktiResource extends JsonResource
         return [
             'id' => $this->id,
             'user' => $this->user->name,
-            'tanggal' => $this->tanggal,
+            // 'tanggal' => $this->tanggal,
+            'tanggal' => Carbon::parse($this->tanggal)->format('d-m-Y'),
             'keterangan' => $this->keterangan,
-            'image' => url('storage/images/absensi/' . $this->image_proof),
+            'image' => url('storage/images/absensi/'.$this->image_proof),
         ];
     }
 }

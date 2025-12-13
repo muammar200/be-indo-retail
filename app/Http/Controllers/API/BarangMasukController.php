@@ -8,6 +8,7 @@ use App\Http\Resources\BarangMasukResource;
 use App\Http\Resources\MetaPaginateResource;
 use App\Models\BarangMasuk;
 use App\Models\Stok;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class BarangMasukController extends Controller
@@ -38,6 +39,8 @@ class BarangMasukController extends Controller
      */
     public function store(BarangMasukRequest $request)
     {
+        $validatedData = $request->validated();
+        $validatedData['tanggal_masuk'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_masuk'])->format('Y-m-d');
         try {
             $stok = Stok::where('kode_barang', $request->kode_barang)->first();
 
@@ -51,7 +54,7 @@ class BarangMasukController extends Controller
                 $stok->sub_kategori = $request->sub_kategori;
                 $stok->save();
 
-                $barangMasuk = BarangMasuk::create($request->validated());
+                $barangMasuk = BarangMasuk::create($validatedData);
 
                 $data = [
                     'status' => true,
@@ -65,12 +68,12 @@ class BarangMasukController extends Controller
                     'harga' => $request->harga,
                     'stok_awal' => $request->jumlah,
                     'stok_total' => $request->jumlah,
-                    'tanggal_masuk' => $request->tanggal_masuk,
+                    'tanggal_masuk' => $validatedData['tanggal_masuk'],
                     'sub_kategori' => $request->sub_kategori,
                     'tanggal_update' => now(),
                 ]);
 
-                $barangMasuk = BarangMasuk::create($request->validated());
+                $barangMasuk = BarangMasuk::create($validatedData);
 
                 $data = [
                     'status' => true,
@@ -91,8 +94,9 @@ class BarangMasukController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BarangMasuk $barangMasuk)
+    public function show(BarangMasuk $id)
     {
+        $barangMasuk = BarangMasuk::find($id);
         $data = [
             'status' => true,
             'message' => 'Get Barang Masuk by Id',
@@ -107,12 +111,15 @@ class BarangMasukController extends Controller
      */
     public function update(BarangMasukRequest $request, string $id)
     {
+        $validatedData = $request->validated();
+        $validatedData['tanggal_masuk'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_masuk'])->format('Y-m-d');
+
         try {
             $barangMasuk = BarangMasuk::find($id);
             $cekBarangMasuk = BarangMasuk::where('kode_barang', $barangMasuk->kode_barang)->count();
 
-            //jika hanya 1 data barang masuk dengan kode barang yang sama
-            //maka hapus data stok lama dan buat data stok baru
+            // jika hanya 1 data barang masuk dengan kode barang yang sama
+            // maka hapus data stok lama dan buat data stok baru
             if ($cekBarangMasuk == 1) {
                 $stok = Stok::where('kode_barang', $barangMasuk->kode_barang)->first();
                 $stok->delete();
@@ -123,12 +130,12 @@ class BarangMasukController extends Controller
                     'harga' => $request->harga,
                     'stok_awal' => $request->jumlah,
                     'stok_total' => $request->jumlah,
-                    'tanggal_masuk' => $request->tanggal_masuk,
+                    'tanggal_masuk' => $validatedData['tanggal_masuk'],
                     'sub_kategori' => $request->sub_kategori,
                     'tanggal_update' => now(),
                 ]);
 
-                $barangMasukBaru = BarangMasuk::create($request->validated());
+                $barangMasukBaru = BarangMasuk::create($validatedData);
 
                 $data = [
                     'status' => true,
@@ -141,8 +148,8 @@ class BarangMasukController extends Controller
             } elseif ($cekBarangMasuk > 1) {
                 $cekBarangMasuk = BarangMasuk::where('kode_barang', $barangMasuk->kode_barang)->first();
 
-                //jika kode barang yang diupdate sama dengan kode barang lama
-                //maka update data stok lama
+                // jika kode barang yang diupdate sama dengan kode barang lama
+                // maka update data stok lama
                 if ($cekBarangMasuk->kode_barang == $request->kode_barang) {
                     $stok = Stok::where('kode_barang', $request->kode_barang)->first();
                     $stok->stok_total -= $barangMasuk->jumlah;
@@ -153,7 +160,7 @@ class BarangMasukController extends Controller
                     $stok->sub_kategori = $request->sub_kategori;
                     $stok->save();
 
-                    $barangMasuk->update($request->validated());
+                    $barangMasuk->update($validatedData);
 
                     $barangMasukUpdate = BarangMasuk::find($id);
 
@@ -165,8 +172,8 @@ class BarangMasukController extends Controller
 
                     return response()->json($data, 200);
                 } else {
-                    //jika kode barang yang diupdate berbeda dengan kode barang lama
-                    //maka kurangi stok lama dan buat data stok baru
+                    // jika kode barang yang diupdate berbeda dengan kode barang lama
+                    // maka kurangi stok lama dan buat data stok baru
                     $stok = Stok::where('kode_barang', $barangMasuk->kode_barang)->first();
                     $stok->stok_total -= $barangMasuk->jumlah;
                     $stok->tanggal_update = now();
@@ -178,12 +185,12 @@ class BarangMasukController extends Controller
                         'harga' => $request->harga,
                         'stok_awal' => $request->jumlah,
                         'stok_total' => $request->jumlah,
-                        'tanggal_masuk' => $request->tanggal_masuk,
+                        'tanggal_masuk' => $validatedData['tanggal_masuk'],
                         'sub_kategori' => $request->sub_kategori,
                         'tanggal_update' => now(),
                     ]);
 
-                    $barangMasukBaru = BarangMasuk::create($request->validated());
+                    $barangMasukBaru = BarangMasuk::create($validatedData);
 
                     $data = [
                         'status' => true,
@@ -214,8 +221,8 @@ class BarangMasukController extends Controller
             $stok = Stok::where('kode_barang', $barangMasuk->kode_barang)->first();
 
             if ($cekBarangMasuk == 1) {
-                //jika hanya 1 data barang masuk dengan kode barang yang sama
-                //maka hapus data stok juga
+                // jika hanya 1 data barang masuk dengan kode barang yang sama
+                // maka hapus data stok juga
                 $stok->delete();
                 $barangMasuk->delete();
 
@@ -224,8 +231,8 @@ class BarangMasukController extends Controller
                     'message' => 'Delete Barang Masuk Success dan Stok Dihapus',
                 ];
             } else {
-                //jika lebih dari 1 data barang masuk dengan kode barang yang sama
-                //maka kurangi stok sesuai jumlah barang masuk yang dihapus
+                // jika lebih dari 1 data barang masuk dengan kode barang yang sama
+                // maka kurangi stok sesuai jumlah barang masuk yang dihapus
                 $stok->stok_total -= $barangMasuk->jumlah;
                 $stok->tanggal_update = now();
                 $stok->save();
