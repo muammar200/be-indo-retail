@@ -9,7 +9,9 @@ use App\Http\Resources\Absensi\UbahStatusResource;
 use App\Http\Resources\AbsensiOnDayResource;
 use App\Models\Absensi;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class DataAbsensiController extends Controller
 {
@@ -18,6 +20,9 @@ class DataAbsensiController extends Controller
         $currentDate = date('Y-m-d');
         if ($request->has('date')) {
             $currentDate = $request->input('date');
+
+            // Parse the date from d-m-Y format and convert it to Y-m-d format
+            $currentDate = Carbon::createFromFormat('d-m-Y', $currentDate)->format('Y-m-d');
         }
 
         $page = $request->input('page', 1);
@@ -43,7 +48,7 @@ class DataAbsensiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data absensi pada tanggal '.$currentDate,
+            'message' => 'Data absensi pada tanggal '.Carbon::createFromFormat('Y-m-d', $currentDate)->format('d-m-Y'),
             'data' => AbsensiOnDayResource::collection($absensis),
         ]);
 
@@ -157,11 +162,36 @@ class DataAbsensiController extends Controller
 
     public function rekapAbsensiByBulan(Request $request)
     {
-        $date = $request->input('date', date('Y-m'));  
+        // Validasi input 'date' dengan format m-Y
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date_format:m-Y',
+        ], [
+            'date.required' => 'Tanggal wajib diisi.',
+            'date.date_format' => 'Format tanggal tidak valid. Harus menggunakan format bulan-tahun (mm-yyyy), contohnya 12-2025.',
+        ]);
 
-       
-        $month = date('m', strtotime($date));  
-        $year = date('Y', strtotime($date));  
+        // Jika validasi gagal, kembalikan error
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors(),
+            ], 400);
+        }
+
+        // $date = $request->input('date', date('Y-m'));
+
+        // $month = date('m', strtotime($date));
+        // $year = date('Y', strtotime($date));
+
+        if ($request->has('date')) {
+            $date = $request->input('date');  // Input format is m-Y (e.g., 12-2025)
+
+            // Parse the date from m-Y format and convert it to Y-m format
+            $formattedDate = Carbon::createFromFormat('m-Y', $date)->format('Y-m');
+
+            // Extract year and month
+            $year = Carbon::createFromFormat('m-Y', $date)->year;
+            $month = Carbon::createFromFormat('m-Y', $date)->month;
+        }
 
         $absensis = Absensi::whereMonth('tanggal', $month)
             ->whereYear('tanggal', $year)
@@ -184,7 +214,7 @@ class DataAbsensiController extends Controller
                         $hadir += 1;
                         break;
                     case 'Terlambat':
-                        $terlambat += 0.5;  
+                        $terlambat += 0.5;
                         break;
                     case 'Hadir(Tidak Absen Pulang)':
                         $hadirTidakAbsenPulang += 0.5;
@@ -201,7 +231,7 @@ class DataAbsensiController extends Controller
                 'user_id' => $userId,
                 'nama' => $user->name,
                 'jabatan' => $user->jabatan,
-                'hadir' => $hadir + $terlambat + $hadirTidakAbsenPulang, 
+                'hadir' => $hadir + $terlambat + $hadirTidakAbsenPulang,
                 'izin' => $izin,
                 'sakit' => $sakit,
             ];

@@ -17,6 +17,7 @@ class BarangKeluarResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'barang_id' => $this->stok->id,
             'kode_barang' => $this->kode_barang,
             'nama' => $this->nama,
             'harga' => $this->harga,
