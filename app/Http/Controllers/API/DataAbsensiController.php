@@ -209,18 +209,28 @@ class DataAbsensiController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:Izin,Sakit,Tidak Disetujui',
+            'status' => 'required|in:Disetujui,Tidak Disetujui',
         ], [
             'status.required' => 'Status harus diisi.',
             'status.in' => 'Status yang dipilih tidak valid. Pilih salah satu dari: Izin, Sakit, atau Tidak Disetujui.',
         ]);
 
-        $absensi->status = $request->input('status');
-        $absensi->save();
+        if ($request->status == 'Disetujui') {
+            if ($absensi->kategori == 'Izin') {
+                $absensi->status = 'Izin';
+                $absensi->save();
+            } elseif ($absensi->kategori == 'Sakit') {
+                $absensi->status = 'Sakit';
+                $absensi->save();
+            }
+        } elseif ($request->status == 'Tidak Disetujui') {
+            $absensi->status = 'Tidak Disetujui';
+            $absensi->save();
+        }
 
         return response()->json([
             'status' => true,
-            'message' => 'Izin/sakit disetujui.',
+            'message' => 'Izin/sakit telah ditangani.',
             'data' => new UbahStatusResource($absensi),
         ]);
     }
@@ -464,8 +474,8 @@ class DataAbsensiController extends Controller
 
             return [
                 'id' => $date->day,
-                'label' => $date->format('d').' '.$bulanIndonesia.' '.$date->format('Y')
-            ]; 
+                'label' => $date->format('d').' '.$bulanIndonesia.' '.$date->format('Y'),
+            ];
         }, $tanggal);
 
         $data = [

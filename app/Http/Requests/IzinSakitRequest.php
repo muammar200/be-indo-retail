@@ -24,6 +24,7 @@ class IzinSakitRequest extends FormRequest
         return [
             'image_proof' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png'],
             'keterangan' => ['nullable', 'string'],
+            'kategori' => ['required', 'in:Izin,Sakit'],
         ];
     }
 
@@ -34,6 +35,8 @@ class IzinSakitRequest extends FormRequest
             'image_proof.file' => 'Bukti izin/sakit harus berupa file yang valid.',
             'image_proof.mimes' => 'Bukti izin/sakit harus berformat PDF, JPG, JPEG, atau PNG.',
             'keterangan.string' => 'Keterangan harus berupa teks.',
+            'kategori.required' => 'Kategori harus diisi.',
+            'kategori.in' => 'Kategori yang valid adalah Sakit atau Izin.',
         ];
     }
 }

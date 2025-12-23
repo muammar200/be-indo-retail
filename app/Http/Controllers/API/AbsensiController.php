@@ -447,12 +447,59 @@ class AbsensiController extends Controller
         }
     }
 
+    // public function izinSakit(IzinSakitRequest $request)
+    // {
+    //     try {
+
+    //         $absensi = Absensi::where('user_id', $request->user()->id)
+    //             ->where('tanggal', date('Y-m-d'))->where('image_proof', '!=', null)
+    //             ->first();
+
+    //         if ($absensi) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda sudah mengirim bukti izin/sakit hari ini.',
+    //             ], 400);
+    //         }
+
+    //         $userAbsensi = [
+    //             'user_id' => $request->user()->id,
+    //             'tanggal' => date('Y-m-d'),
+    //             'status' => 'Menunggu Konfirmasi',
+    //         ];
+
+    //         if($request->keterangan){
+    //             $userAbsensi['keterangan'] = $request->keterangan;
+    //         }
+
+    //         // store image proof
+    //         $imagePath = $request->file('image_proof')->store('images/absensi', 'public');
+    //         $imageFileName = basename($imagePath);
+
+    //         $userAbsensi['image_proof'] = $imageFileName;
+
+    //         Absensi::create($userAbsensi);
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'message' => 'Bukti Izin/Sakit Berhasil Dikirim',
+    //         ], 201);
+
+    //     } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => $th->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function izinSakit(IzinSakitRequest $request)
     {
         try {
-
+            // Memeriksa apakah sudah ada absensi untuk hari ini
             $absensi = Absensi::where('user_id', $request->user()->id)
-                ->where('tanggal', date('Y-m-d'))->where('image_proof', '!=', null)
+                ->where('tanggal', date('Y-m-d'))
+                ->where('image_proof', '!=', null)
                 ->first();
 
             if ($absensi) {
@@ -462,27 +509,35 @@ class AbsensiController extends Controller
                 ], 400);
             }
 
+            // Menyiapkan data absensi yang akan disimpan
             $userAbsensi = [
                 'user_id' => $request->user()->id,
                 'tanggal' => date('Y-m-d'),
                 'status' => 'Menunggu Konfirmasi',
+                'kategori' =>  $request->kategori
             ];
 
-            if($request->keterangan){
+
+    
+            
+
+            // Menambahkan keterangan jika ada
+            if ($request->keterangan) {
                 $userAbsensi['keterangan'] = $request->keterangan;
             }
 
-            // store image proof
+            // Menyimpan bukti gambar
             $imagePath = $request->file('image_proof')->store('images/absensi', 'public');
             $imageFileName = basename($imagePath);
 
             $userAbsensi['image_proof'] = $imageFileName;
 
+            // Menyimpan data absensi ke database
             Absensi::create($userAbsensi);
 
             return response()->json([
                 'status' => true,
-                'message' => 'Bukti Izin/Sakit Berhasil Dikirim',
+                'message' => 'Bukti ' . $request->kategori .  ' Berhasil Dikirim',
             ], 201);
 
         } catch (\Throwable $th) {

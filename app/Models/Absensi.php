@@ -17,6 +17,7 @@ class Absensi extends Model
         'waktu_checkin',
         'waktu_checkout',
         'image_proof',
+        'kategori'
     ];
 
     protected $with = ['user'];
