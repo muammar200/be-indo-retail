@@ -19,7 +19,8 @@ class AbsensiOnDayResource extends JsonResource
             'user' => $this->user->name,
             'waktu_checkin' => $this->waktu_checkin,
             'waktu_checkout' => $this->waktu_checkout,
-            'status' => $this->status === 'Menunggu Konfirmasi' ? '-' : $this->status,
+            // 'status' => $this->status === 'Menunggu Konfirmasi' ? '-' : $this->status,
+            'status' => $this->status,
             'izin_sakit' => $this->image_proof ? $this->status : '-',
         ];
     }

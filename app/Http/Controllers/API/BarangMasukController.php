@@ -94,7 +94,7 @@ class BarangMasukController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BarangMasuk $id)
+    public function show($id)
     {
         $barangMasuk = BarangMasuk::find($id);
         $data = [

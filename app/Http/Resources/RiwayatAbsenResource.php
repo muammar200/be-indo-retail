@@ -15,9 +15,12 @@ class RiwayatAbsenResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        static $incrementId = 1;
+
         $tanggalDenganHari = Carbon::parse($this->tanggal)->locale('id')->translatedFormat('l, d F Y');
 
         return [
+            'id' => $incrementId++,
             'tanggal' => $tanggalDenganHari,
             'waktu_checkin' => $this->waktu_checkin ? $this->waktu_checkin : '-',
             'waktu_checkout' => $this->waktu_checkout ? $this->waktu_checkout : '-',

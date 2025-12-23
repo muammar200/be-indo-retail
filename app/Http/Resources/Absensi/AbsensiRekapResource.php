@@ -14,7 +14,10 @@ class AbsensiRekapResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        static $incrementId = 1;
+
         return [
+            'id' => $incrementId++,
             'nama' => $this->nama,
             'jabatan' => $this->jabatan,
             'hadir' => $this->hadir,

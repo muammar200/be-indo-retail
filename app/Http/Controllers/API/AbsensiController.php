@@ -9,33 +9,226 @@ use App\Http\Resources\Absensi\ClockOutResource;
 use App\Http\Resources\MetaPaginateResource;
 use App\Http\Resources\RiwayatAbsenResource;
 use App\Models\Absensi;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AbsensiController extends Controller
 {
+    // public function clockIn(Request $request)
+    // {
+    //     $absensi = Absensi::where('user_id', $request->user()->id)
+    //         ->where('tanggal', date('Y-m-d'))
+    //         ->first();
+    //     try {
+
+    //         if ($absensi) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda sudah melakukan absensi masuk hari ini.',
+    //             ], 400);
+    //         }
+
+    //         $userLatitude = $request->input('latitude');
+    //         $userLongitude = $request->input('longitude');
+
+    //         $officeLatitude = -5.2052646;
+    //         $officeLongitude = 119.4948216;
+
+    //         // Maks jarak (meter)
+    //         $maxDistance = 1000;
+
+    //         $distance = $this->calculateDistance($userLatitude, $userLongitude, $officeLatitude, $officeLongitude);
+
+    //         if ($distance > $maxDistance) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda terlalu jauh dari area yang ditentukan untuk melakukan absensi.',
+    //             ], 400);
+    //         }
+
+    //         $userAbsensi = [
+    //             'user_id' => $request->user()->id,
+    //             'tanggal' => date('Y-m-d'),
+    //             'waktu_checkin' => date('H:i:s'),
+    //             'status' => 'Hadir',
+    //         ];
+
+    //         $absensi = Absensi::create($userAbsensi);
+
+    //         $data = [
+    //             'status' => true,
+    //             'message' => 'Clock In Success',
+    //             'data' => new ClockInResource($absensi),
+    //         ];
+
+    //         return response()->json($data, 201);
+
+    //     } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => $th->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+    // public function clockIn(Request $request)
+    // {
+    //     // Ambil tanggal dan waktu dari request
+    //     $tanggal = $request->input('tanggal');  // Format: YYYY-DD-MM (misalnya 2025-26-12)
+    //     $waktu = $request->input('waktu');      // Format: HH:MM (misalnya 17:56)
+
+    //     // Validasi input tanggal dan waktu
+    //     if (empty($tanggal) || empty($waktu)) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Tanggal dan Waktu harus diisi.',
+    //         ], 400);
+    //     }
+
+    //     // Mengonversi tanggal dari format YYYY-DD-MM ke YYYY-MM-DD
+    //     try {
+    //         // Pecah tanggal yang dikirim (YYYY-DD-MM) menjadi komponen tanggal
+    //         [$tahun, $hari, $bulan] = explode('-', $tanggal);
+
+    //         // Buat objek Carbon dari tanggal yang sudah diperbaiki menjadi format YYYY-MM-DD
+    //         $formattedDate = Carbon::createFromDate($tahun, $bulan, $hari)->format('Y-m-d');
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Format tanggal tidak valid.',
+    //         ], 400);
+    //     }
+
+    //     // Gabungkan tanggal dan waktu untuk membuat timestamp
+    //     $tanggalWaktu = $formattedDate.' '.$waktu.':00';  // Menggabungkan menjadi format: YYYY-MM-DD HH:MM:00
+
+    //     try {
+    //         // Cek apakah absensi sudah ada untuk tanggal yang diberikan
+    //         $absensi = Absensi::where('user_id', $request->user()->id)
+    //             ->where('tanggal', $formattedDate)  // Menggunakan tanggal yang sudah diperbaiki
+    //             ->first();
+
+    //         if ($absensi) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda sudah melakukan absensi masuk pada tanggal ini.',
+    //             ], 400);
+    //         }
+
+    //         $userLatitude = $request->input('latitude');
+    //         $userLongitude = $request->input('longitude');
+
+    //         // Koordinat kantor
+    //         $officeLatitude = -5.2052646;
+    //         $officeLongitude = 119.4948216;
+
+    //         // Maksimum jarak absensi (meter)
+    //         $maxDistance = 10000;
+
+    //         // Menghitung jarak
+    //         $distance = $this->calculateDistance($userLatitude, $userLongitude, $officeLatitude, $officeLongitude);
+
+    //         if ($distance > $maxDistance) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda terlalu jauh dari area yang ditentukan untuk melakukan absensi.',
+    //             ], 400);
+    //         }
+
+    //         // Data absensi
+    //         $userAbsensi = [
+    //             'user_id' => $request->user()->id,
+    //             'tanggal' => $formattedDate,  // Menggunakan tanggal yang sudah diperbaiki
+    //             'waktu_checkin' => Carbon::createFromFormat('Y-m-d H:i:s', $tanggalWaktu)->format('H:i:s'),
+    //             'status' => 'Hadir',
+    //         ];
+
+    //         // Membuat absensi baru
+    //         $absensi = Absensi::create($userAbsensi);
+
+    //         // Response sukses
+    //         $data = [
+    //             'status' => true,
+    //             'message' => 'Clock In Success',
+    //             'data' => new ClockInResource($absensi),
+    //         ];
+
+    //         return response()->json($data, 201);
+
+    //     } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => $th->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function clockIn(Request $request)
     {
-        $absensi = Absensi::where('user_id', $request->user()->id)
-            ->where('tanggal', date('Y-m-d'))
-            ->first();
+        // Ambil tanggal dan waktu dari request
+        $tanggal = $request->input('tanggal');  // Format: YYYY-DD-MM (misalnya 2025-26-12)
+        $waktu = $request->input('waktu');      // Format: HH:MM (misalnya 07:56)
+
+        // Menghapus tanda kutip ganda
+        $tanggal = str_replace('"', '', $tanggal);
+        $waktu = str_replace('"', '', $waktu);
+
+        // Validasi input tanggal dan waktu
+        if (empty($tanggal) || empty($waktu)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tanggal dan Waktu harus diisi.',
+            ], 400);
+        }
+
+        // Mengonversi tanggal dari format YYYY-DD-MM ke YYYY-MM-DD
         try {
+            // Pecah tanggal yang dikirim (YYYY-DD-MM) menjadi komponen tanggal
+            [$tahun, $hari, $bulan] = explode('-', $tanggal);
+
+            // Buat objek Carbon dari tanggal yang sudah diperbaiki menjadi format YYYY-MM-DD
+            $formattedDate = $tanggal;
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Format tanggal tidak valid.',
+            ], 400);
+        }
+
+        // Gabungkan tanggal dan waktu untuk membuat timestamp
+        $tanggalWaktu = $formattedDate.' '.$waktu.':00';  // Menggabungkan menjadi format: YYYY-MM-DD HH:MM:00
+
+        try {
+            // Cek apakah absensi sudah ada untuk tanggal yang diberikan
+            $absensi = Absensi::where('user_id', $request->user()->id)
+                ->where('tanggal', $formattedDate)  // Menggunakan tanggal yang sudah diperbaiki
+                ->first();
 
             if ($absensi) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Anda sudah melakukan absensi masuk hari ini.',
+                    'message' => 'Anda sudah melakukan absensi masuk pada tanggal ini.',
                 ], 400);
             }
 
+            // Cek apakah waktu check-in lebih dari jam 08:00
+            $jamKerja = '08:00:00';  // Batas waktu hadir
+
+            // Bandingkan waktu check-in dengan jam 08:00:00
+            $status = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalWaktu)->format('H:i:s') <= $jamKerja ? 'Hadir' : 'Terlambat';
+
+            // Menghitung jarak untuk absensi berdasarkan latitude dan longitude
             $userLatitude = $request->input('latitude');
             $userLongitude = $request->input('longitude');
 
+            // Koordinat kantor
             $officeLatitude = -5.2052646;
             $officeLongitude = 119.4948216;
 
-            // Maks jarak (meter)
-            $maxDistance = 1000;
+            // Maksimum jarak absensi (meter)
+            $maxDistance = 10000;
 
+            // Menghitung jarak
             $distance = $this->calculateDistance($userLatitude, $userLongitude, $officeLatitude, $officeLongitude);
 
             if ($distance > $maxDistance) {
@@ -45,15 +238,18 @@ class AbsensiController extends Controller
                 ], 400);
             }
 
+            // Data absensi
             $userAbsensi = [
                 'user_id' => $request->user()->id,
-                'tanggal' => date('Y-m-d'),
-                'waktu_checkin' => date('H:i:s'),
-                'status' => 'Hadir',
+                'tanggal' => $formattedDate,  // Menggunakan tanggal yang sudah diperbaiki
+                'waktu_checkin' => Carbon::createFromFormat('Y-m-d H:i:s', $tanggalWaktu)->format('H:i:s'),
+                'status' => $status,  // Status ditentukan berdasarkan waktu check-in
             ];
 
+            // Membuat absensi baru
             $absensi = Absensi::create($userAbsensi);
 
+            // Response sukses
             $data = [
                 'status' => true,
                 'message' => 'Clock In Success',
@@ -70,18 +266,120 @@ class AbsensiController extends Controller
         }
     }
 
+    // public function clockOut(Request $request)
+    // {
+    //     $absensi = Absensi::where('user_id', $request->user()->id)
+    //         ->where('tanggal', date('Y-m-d'))
+    //         ->first();
+
+    //     try {
+
+    //         if (! $absensi) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda belum melakukan absen masuk hari ini.',
+    //             ], 400);
+    //         }
+
+    //         if (empty($absensi->waktu_checkin)) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda belum melakukan absen masuk, tidak bisa absen pulang.',
+    //             ], 400);
+    //         }
+
+    //         // Cek apakah sudah jam 17:00
+    //         $currentTime = date('H:i:s');
+    //         $jamPulang = '17:00:00';
+
+    //         if ($currentTime < $jamPulang) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Belum waktu pulang. Clock out hanya bisa dilakukan mulai jam 17:00.',
+    //             ], 400);
+    //         }
+
+    //         if (! empty($absensi->waktu_checkout)) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda sudah melakukan absensi pulang hari ini.',
+    //             ], 400);
+    //         }
+
+    //         $userLatitude = $request->input('latitude');
+    //         $userLongitude = $request->input('longitude');
+
+    //         $officeLatitude = -5.2052646;
+    //         $officeLongitude = 119.4948216;
+
+    //         // Maks jarak (meter)
+    //         $maxDistance = 1000;
+
+    //         $distance = $this->calculateDistance($userLatitude, $userLongitude, $officeLatitude, $officeLongitude);
+
+    //         if ($distance > $maxDistance) {
+    //             return response()->json([
+    //                 'status' => false,
+    //                 'message' => 'Anda terlalu jauh dari area yang ditentukan untuk melakukan absensi.',
+    //             ], 400);
+    //         }
+
+    //         $absensi->update([
+    //             'waktu_checkout' => $currentTime,
+    //         ]);
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'message' => 'Clock Out Success',
+    //             'data' => new ClockOutResource($absensi),
+    //         ], 201);
+
+    //     } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => $th->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function clockOut(Request $request)
     {
-        $absensi = Absensi::where('user_id', $request->user()->id)
-            ->where('tanggal', date('Y-m-d'))
-            ->first();
+        // Ambil tanggal dan waktu dari request
+        $tanggal = $request->input('tanggal');  // Format: YYYY-DD-MM (misalnya 2025-26-12)
+        $waktu = $request->input('waktu');      // Format: HH:MM (misalnya 17:56)
+
+        // Validasi input tanggal dan waktu
+        if (empty($tanggal) || empty($waktu)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Tanggal dan Waktu harus diisi.',
+            ], 400);
+        }
+
+        // Mengonversi tanggal dari format YYYY-DD-MM ke YYYY-MM-DD
+        try {
+            // Pecah tanggal yang dikirim (YYYY-DD-MM) menjadi komponen tanggal
+            [$tahun, $hari, $bulan] = explode('-', $tanggal);
+
+            // Buat objek Carbon dari tanggal yang sudah diperbaiki menjadi format YYYY-MM-DD
+            $formattedDate = $tanggal;
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Format tanggal tidak valid.',
+            ], 400);
+        }
 
         try {
+            // Cek apakah absensi sudah ada untuk tanggal yang diberikan
+            $absensi = Absensi::where('user_id', $request->user()->id)
+                ->where('tanggal', $formattedDate)  // Menggunakan tanggal yang sudah diperbaiki
+                ->first();
 
             if (! $absensi) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Anda belum melakukan absen masuk hari ini.',
+                    'message' => 'Anda belum melakukan absen masuk pada tanggal ini.',
                 ], 400);
             }
 
@@ -93,7 +391,7 @@ class AbsensiController extends Controller
             }
 
             // Cek apakah sudah jam 17:00
-            $currentTime = date('H:i:s');
+            $currentTime = $waktu;
             $jamPulang = '17:00:00';
 
             if ($currentTime < $jamPulang) {
@@ -113,12 +411,14 @@ class AbsensiController extends Controller
             $userLatitude = $request->input('latitude');
             $userLongitude = $request->input('longitude');
 
+            // Koordinat kantor
             $officeLatitude = -5.2052646;
             $officeLongitude = 119.4948216;
 
-            // Maks jarak (meter)
+            // Maksimum jarak absensi (meter)
             $maxDistance = 1000;
 
+            // Menghitung jarak
             $distance = $this->calculateDistance($userLatitude, $userLongitude, $officeLatitude, $officeLongitude);
 
             if ($distance > $maxDistance) {
@@ -128,6 +428,7 @@ class AbsensiController extends Controller
                 ], 400);
             }
 
+            // Update waktu checkout
             $absensi->update([
                 'waktu_checkout' => $currentTime,
             ]);
@@ -166,6 +467,10 @@ class AbsensiController extends Controller
                 'tanggal' => date('Y-m-d'),
                 'status' => 'Menunggu Konfirmasi',
             ];
+
+            if($request->keterangan){
+                $userAbsensi['keterangan'] = $request->keterangan;
+            }
 
             // store image proof
             $imagePath = $request->file('image_proof')->store('images/absensi', 'public');
