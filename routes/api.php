@@ -9,13 +9,19 @@ use App\Http\Controllers\API\LaporanBarangMasukController;
 use App\Http\Controllers\API\PermintaanBarangController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\BarangKeluarController;
+use App\Http\Controllers\FcmController;
 use App\Http\Controllers\StokController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
+
 Route::middleware(['auth:api', 'jabatan:Staff'])->get('/tes', function (Request $request) {
     return 'haloo';
 });
+
+Route::post('/fcm-token', [FcmController::class, 'store'])->middleware(['auth:api']);
+
 
 // AUTH
 Route::post('/login', [AuthController::class, 'login']);

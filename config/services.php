@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // config/services.php
+    'fcm' => [
+        'project_id' => env('FCM_PROJECT_ID'),
+    ],
+
 ];
