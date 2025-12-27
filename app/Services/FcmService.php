@@ -48,7 +48,7 @@ class FcmService
         $client = new Client([
             'timeout' => 5,
         ]);
-
+        
         foreach ($tokens as $token) {
             try {
                 $client->post(

@@ -416,7 +416,7 @@ class AbsensiController extends Controller
             $officeLongitude = 119.4948216;
 
             // Maksimum jarak absensi (meter)
-            $maxDistance = 1000;
+            $maxDistance = 10000;
 
             // Menghitung jarak
             $distance = $this->calculateDistance($userLatitude, $userLongitude, $officeLatitude, $officeLongitude);

@@ -22,6 +22,9 @@ Route::middleware(['auth:api', 'jabatan:Staff'])->get('/tes', function (Request 
 
 Route::post('/fcm-token', [FcmController::class, 'store'])->middleware(['auth:api']);
 
+Route::get('/dates-in-month', [App\Http\Controllers\API\DataAbsensiController::class, 'getTanggalDiBUlan']);
+Route::get('/month', [App\Http\Controllers\API\DataAbsensiController::class, 'getMonth']);
+
 
 // AUTH
 Route::post('/login', [AuthController::class, 'login']);
@@ -40,20 +43,22 @@ Route::post('/absensi/izin-sakit', [AbsensiController::class, 'izinSakit'])->mid
 Route::get('/absensi/history', [AbsensiController::class, 'riwayatAbsenByBulan'])->middleware(['auth:api']);
 
 // DATA ABSENSI
-// Route::middleware(['auth:api', 'jabatan:Pimpinan,Staff'])->group(function () {
-    Route::get('/data-absensi/on-day', [App\Http\Controllers\API\DataAbsensiController::class, 'absensiOnDay']); // Pimpinan, Staff
-    Route::get('/data-absensi/on-day/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'absensiById']); // Pimpinan, Staff
-// });
-// Route::middleware(['auth:api', 'jabatan:Pimpinan'])->group(function () {
-    Route::get('/data-absensi/bukti-izin-sakit/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'buktiIzinSakit']); // //Pimpinan
-    Route::patch('/data-absensi/update-status/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'updateStatusAbsensi']); // Pimpinan
-// });
-// Route::middleware(['auth:api', 'jabatan:Pimpinan,Staff'])->group(function () {
-    Route::get('/data-absensi/rekap-absensi-by-bulan', [App\Http\Controllers\API\DataAbsensiController::class, 'rekapAbsensiByBulan']); // Pimpinan, Staff
-// });
-// Route::middleware(['auth:api', 'jabatan:Pimpinan'])->group(function () {
-    Route::patch('/data-absensi/approve-izin-sakit/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'approveIzinSakit']); // Pimpinan
-// });
+Route::middleware(['auth:api'])->group(function(){
+    // Route::middleware(['auth:api', 'jabatan:Pimpinan,Staff'])->group(function () {
+        Route::get('/data-absensi/on-day', [App\Http\Controllers\API\DataAbsensiController::class, 'absensiOnDay']); // Pimpinan, Staff
+        Route::get('/data-absensi/on-day/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'absensiById']); // Pimpinan, Staff
+    // });
+    // Route::middleware(['auth:api', 'jabatan:Pimpinan'])->group(function () {
+        Route::get('/data-absensi/bukti-izin-sakit/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'buktiIzinSakit']); // //Pimpinan
+        Route::patch('/data-absensi/update-status/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'updateStatusAbsensi']); // Pimpinan
+    // });
+    // Route::middleware(['auth:api', 'jabatan:Pimpinan,Staff'])->group(function () {
+        Route::get('/data-absensi/rekap-absensi-by-bulan', [App\Http\Controllers\API\DataAbsensiController::class, 'rekapAbsensiByBulan']); // Pimpinan, Staff
+    // });
+    // Route::middleware(['auth:api', 'jabatan:Pimpinan'])->group(function () {
+        Route::patch('/data-absensi/approve-izin-sakit/{id}', [App\Http\Controllers\API\DataAbsensiController::class, 'approveIzinSakit']); // Pimpinan
+    // });
+});
 
 // DASHBOARD
 // Route::middleware(['auth:api'])->group(function () {
@@ -65,7 +70,7 @@ Route::get('/dashboard', [App\Http\Controllers\API\DashboardController::class, '
 //     Route::apiResource('users', UserController::class);
 // });
 
-Route::prefix('admin')->group(function () {
+Route::middleware(['auth:api'])->prefix('admin')->group(function () {
 
     // USER
     // Route::middleware(['auth:api', 'jabatan:Pimpinan,Staff'])->group(function () {
