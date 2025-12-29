@@ -13,7 +13,7 @@ class SendDailyNotification extends Command
     protected $signature = 'notify:daily';
 
     /**
-     * The console command description.
+ * The console command description.
      */
     protected $description = 'Send daily push notification to all users';
 

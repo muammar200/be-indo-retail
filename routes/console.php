@@ -5,21 +5,22 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
+// Hanya contoh cara penggunaan console
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-$now = Carbon::now('Asia/Makassar'); // Mendapatkan waktu sekarang di zona waktu Asia/Makassar
-$formattedTime = $now->format('H:i'); // Memformat waktu menjadi format jam:menit (24 jam)
 
+// Mendapatkan waktu saat ini berdasarkan zona waktu Asia/Makassar
+$now = Carbon::now('Asia/Makassar'); 
+
+// Mengatur format waktu menjadi jam dan menit sekarang. Untuk waktu notifikasinya diatur di server
+$formattedTime = $now->format('H:i'); 
+
+// Menjadwalkan perintah 'notify:daily' untuk dijalankan setiap hari pada waktu yang telah diformat
 Schedule::command('notify:daily')
-    ->dailyAt($formattedTime) // Menggunakan waktu sekarang
-    ->timezone('Asia/Makassar')
-    ->withoutOverlapping()
-    ->onOneServer();
+    ->dailyAt($formattedTime) // Waktu eksekusi berdasarkan nilai $formattedTime
+    ->timezone('Asia/Makassar') // Menetapkan zona waktu untuk jadwal ini
+    ->withoutOverlapping() // Mencegah eksekusi jadwal yang tumpang tindih
+    ->onOneServer(); // Menjalankan perintah hanya pada satu server (untuk mencegah eksekusi ganda di server berbeda)
 
-// Schedule::command('notify:daily')
-//     ->dailyAt('23:26')
-//     ->timezone('Asia/Makassar')
-//     ->withoutOverlapping()
-//     ->onOneServer();
