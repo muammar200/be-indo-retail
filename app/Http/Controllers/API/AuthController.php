@@ -112,15 +112,14 @@ class AuthController extends Controller
             $cacheKey = "otp_throttle:{$wa}";
             Cache::put($cacheKey, now()->addMinutes(5)->timestamp, 300); // 300 detik
 
-            // $res = FonnteService::send($wa, "Kode OTP kamu adalah: $otp (berlaku 5 menit)");
+            $res = FonnteService::send($wa, "Kode OTP kamu adalah: $otp (berlaku 5 menit)");
 
-            // if (! isset($res['status']) || $res['status'] != true) {
-            //     return response()->json([
-            //         'status' => false,
-            //         'message' => 'Gagal mengirim pesan WhatsApp',
-            //         // 'detail' => $res,
-            //     ], 500);
-            // }
+            if (! isset($res['status']) || $res['status'] != true) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Gagal mengirim pesan WhatsApp',
+                ], 500);
+            }
 
             return response()->json([
                 'status' => true,
