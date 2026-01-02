@@ -13,8 +13,10 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    // Fungsi untuk menangani proses login
     public function login(Request $request)
     {
+        // Validasi input, pastikan nomor HP dan password diberikan
         $credentials = $request->validate([
             'no_hp' => 'required',
             'password' => 'required',
@@ -24,6 +26,7 @@ class AuthController extends Controller
         ]);
 
         try {
+            // Cek apakah kredensial valid, jika tidak, kirim respons error
             if (! $token = auth()->guard('api')->attempt($credentials)) {
                 return response()->json([
                     'status' => false,
@@ -31,8 +34,10 @@ class AuthController extends Controller
                 ], 401);
             }
 
+            // Ambil data pengguna yang berhasil login
             $user = auth()->guard('api')->user();
 
+            // Kirim respons dengan token dan data pengguna
             $data = [
                 'status' => true,
                 'message' => 'Login Success',
@@ -46,6 +51,7 @@ class AuthController extends Controller
 
             return response()->json($data, 200);
         } catch (\Throwable $th) {
+            // Jika terjadi kesalahan, kirimkan error
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage(),
@@ -53,9 +59,11 @@ class AuthController extends Controller
         }
     }
 
+    // Fungsi untuk logout pengguna
     public function logout(Request $request)
     {
         try {
+            // Invalidate token JWT
             $removeToken = JWTAuth::invalidate(JWTAuth::getToken());
             if ($removeToken) {
                 return response()->json([
@@ -71,6 +79,7 @@ class AuthController extends Controller
         }
     }
 
+    // Fungsi untuk mendapatkan data pengguna yang sudah terautentikasi
     public function me(Request $request)
     {
         $data = [
@@ -82,16 +91,20 @@ class AuthController extends Controller
         return response()->json($data, 200);
     }
 
+    // Fungsi untuk mengirimkan OTP ke nomor WhatsApp pengguna
     public function sendOtp(Request $request)
     {
         try {
+            // Validasi nomor WhatsApp
             $request->validate([
                 'whatsapp' => 'required',
             ]);
 
+            // Normalisasi nomor WhatsApp
             $wa = $this->normalizeWa($request->whatsapp);
             $user = User::where('no_hp', $wa)->first();
 
+            // Jika nomor WhatsApp tidak ditemukan, kirim error
             if (! $user) {
                 return response()->json([
                     'status' => false,
@@ -99,21 +112,21 @@ class AuthController extends Controller
                 ], 404);
             }
 
+            // Generate OTP acak dan simpan ke database
             $otp = rand(100000, 999999);
-
             $user->update([
                 'otp' => $otp,
                 'otp_expires_at' => now()->addMinutes(5),
             ]);
 
-            $user = User::where('no_hp', $wa)->first();
-
-            // set throttle cache (simpan expiry timestamp agar response dapat beri retry_after)
+            // Atur throttle cache untuk OTP
             $cacheKey = "otp_throttle:{$wa}";
-            Cache::put($cacheKey, now()->addMinutes(5)->timestamp, 300); // 300 detik
+            Cache::put($cacheKey, now()->addMinutes(5)->timestamp, 300);
 
+            // Kirim OTP melalui layanan WhatsApp (FonnteService)
             $res = FonnteService::send($wa, "Kode OTP kamu adalah: $otp (berlaku 5 menit)");
 
+            // Jika pengiriman OTP gagal, kirim error
             if (! isset($res['status']) || $res['status'] != true) {
                 return response()->json([
                     'status' => false,
@@ -121,11 +134,11 @@ class AuthController extends Controller
                 ], 500);
             }
 
+            // Jika berhasil, kirimkan respons sukses
             return response()->json([
                 'status' => true,
                 'message' => 'OTP berhasil dikirim!',
             ]);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
@@ -134,14 +147,16 @@ class AuthController extends Controller
         }
     }
 
+    // Fungsi untuk memverifikasi OTP yang dimasukkan pengguna
     public function verifyOtp(Request $request)
     {
         try {
+            // Validasi input OTP
             $request->validate([
                 'otp' => 'required',
             ]);
 
-            // $user = User::where('otp', $request->no_hp)->first();
+            // Cek apakah OTP valid dan tidak kedaluwarsa
             $user = User::where('otp', $request->otp)->first();
 
             if (! $user) {
@@ -151,13 +166,6 @@ class AuthController extends Controller
                 ], 404);
             }
 
-            // if ($user->otp !== $request->otp) {
-            //     return response()->json([
-            //         'status' => false,
-            //         'message' => 'OTP salah',
-            //     ], 400);
-            // }
-
             if (now()->greaterThan($user->otp_expires_at)) {
                 return response()->json([
                     'status' => false,
@@ -165,12 +173,10 @@ class AuthController extends Controller
                 ], 400);
             }
 
-            // generate temporary token untuk reset password
+            // Generate token untuk reset password dan simpan ke cache
             $token = Str::random(64);
             $cacheKey = "password_reset_token:{$token}";
-
-            // simpan mapping token -> whatsapp (15 menit)
-            Cache::put($cacheKey, $user->no_hp, 900); // 900 detik = 15 menit
+            Cache::put($cacheKey, $user->no_hp, 900);
 
             return response()->json([
                 'status' => true,
@@ -186,14 +192,17 @@ class AuthController extends Controller
         }
     }
 
+    // Fungsi untuk mereset password pengguna
     public function resetPassword(Request $request)
     {
         try {
+            // Validasi input password reset token dan password baru
             $request->validate([
                 'password_reset_token' => 'required',
                 'password' => 'required|min:8|confirmed',
             ]);
 
+            // Cek apakah token valid
             $token = $request->password_reset_token;
             $cacheKey = "password_reset_token:{$token}";
 
@@ -204,10 +213,11 @@ class AuthController extends Controller
                 ], 400);
             }
 
+            // Ambil nomor WhatsApp pengguna dari cache
             $wa = Cache::get($cacheKey);
-
             $user = User::where('no_hp', $wa)->first();
 
+            // Jika pengguna tidak ditemukan, kirim error
             if (! $user) {
                 return response()->json([
                     'status' => false,
@@ -215,13 +225,14 @@ class AuthController extends Controller
                 ], 404);
             }
 
+            // Update password pengguna dan hapus OTP
             $user->update([
                 'password' => $request->password,
                 'otp' => null,
                 'otp_expires_at' => null,
             ]);
 
-            // hapus token dari cache
+            // Hapus token dari cache
             Cache::forget($cacheKey);
 
             return response()->json([
@@ -236,10 +247,13 @@ class AuthController extends Controller
         }
     }
 
+    // Fungsi untuk menormalkan nomor WhatsApp agar sesuai format internasional
     private function normalizeWa($number)
     {
+        // Hilangkan karakter non-digit
         $number = preg_replace('/[^0-9]/', '', $number);
 
+        // Ubah nomor lokal ke format internasional jika perlu
         if (substr($number, 0, 1) === '0') {
             $number = '62'.substr($number, 1);
         }

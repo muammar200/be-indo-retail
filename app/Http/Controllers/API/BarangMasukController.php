@@ -14,16 +14,26 @@ use Illuminate\Http\Request;
 class BarangMasukController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar barang masuk dengan pagination dan pencarian.
      */
     public function index(Request $request)
     {
+        // Ambil parameter halaman, jumlah per halaman, dan kata kunci pencarian
         $page = $request->input('page', 1);
         $perpage = $request->input('perpage', 10);
         $search = $request->input('search', '');
 
-        $barang_masuk = BarangMasuk::latest()->where('nama', 'LIKE', "%$search%")->orWhere('kode_barang', 'LIKE', "%$search%")->orWhere('harga', 'LIKE', "%$search%")->orWhere('jumlah', 'LIKE', "%$search%")->orWhere('sub_kategori', 'LIKE', "%$search%")->orWhere('tanggal_masuk', 'LIKE', "%$search%")->paginate($perpage, ['*'], 'page', $page);
+        // Ambil data barang masuk dengan pencarian berdasarkan beberapa field
+        $barang_masuk = BarangMasuk::latest()
+            ->where('nama', 'LIKE', "%$search%")
+            ->orWhere('kode_barang', 'LIKE', "%$search%")
+            ->orWhere('harga', 'LIKE', "%$search%")
+            ->orWhere('jumlah', 'LIKE', "%$search%")
+            ->orWhere('sub_kategori', 'LIKE', "%$search%")
+            ->orWhere('tanggal_masuk', 'LIKE', "%$search%")
+            ->paginate($perpage, ['*'], 'page', $page);
 
+        // Format data response dengan resource
         $data = [
             'status' => true,
             'message' => 'Show Barang Masuk Success',
@@ -35,25 +45,28 @@ class BarangMasukController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data barang masuk baru dan memperbarui stok.
      */
     public function store(BarangMasukRequest $request)
     {
         $validatedData = $request->validated();
+        // Format tanggal masuk menjadi format Y-m-d
         $validatedData['tanggal_masuk'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_masuk'])->format('Y-m-d');
+
         try {
+            // Cek apakah barang sudah ada di stok
             $stok = Stok::where('kode_barang', $request->kode_barang)->first();
 
             if ($stok) {
+                // Jika ada, update stok dan simpan perubahan
                 $stok->stok_total += $request->jumlah;
                 $stok->tanggal_update = now();
-
-                // if needed, update other fields
                 $stok->nama = $request->nama;
                 $stok->harga = $request->harga;
                 $stok->sub_kategori = $request->sub_kategori;
                 $stok->save();
 
+                // Simpan data barang masuk
                 $barangMasuk = BarangMasuk::create($validatedData);
 
                 $data = [
@@ -62,6 +75,7 @@ class BarangMasukController extends Controller
                     'data' => new BarangMasukResource($barangMasuk),
                 ];
             } else {
+                // Jika tidak ada, buat entri stok baru
                 Stok::create([
                     'kode_barang' => $request->kode_barang,
                     'nama' => $request->nama,
@@ -73,6 +87,7 @@ class BarangMasukController extends Controller
                     'tanggal_update' => now(),
                 ]);
 
+                // Simpan data barang masuk
                 $barangMasuk = BarangMasuk::create($validatedData);
 
                 $data = [
@@ -92,7 +107,7 @@ class BarangMasukController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan data barang masuk berdasarkan ID.
      */
     public function show($id)
     {
@@ -107,20 +122,22 @@ class BarangMasukController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Memperbarui data barang masuk dan stok terkait.
      */
     public function update(BarangMasukRequest $request, string $id)
     {
         $validatedData = $request->validated();
+        // Format tanggal masuk menjadi format Y-m-d
         $validatedData['tanggal_masuk'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_masuk'])->format('Y-m-d');
 
         try {
+            // Ambil data barang masuk yang ingin diupdate
             $barangMasuk = BarangMasuk::find($id);
             $cekBarangMasuk = BarangMasuk::where('kode_barang', $barangMasuk->kode_barang)->count();
 
-            // jika hanya 1 data barang masuk dengan kode barang yang sama
-            // maka hapus data stok lama dan buat data stok baru
+            // Jika hanya 1 data barang masuk dengan kode barang yang sama
             if ($cekBarangMasuk == 1) {
+                // Hapus stok lama dan buat stok baru
                 $stok = Stok::where('kode_barang', $barangMasuk->kode_barang)->first();
                 $stok->delete();
 
@@ -144,13 +161,12 @@ class BarangMasukController extends Controller
                 ];
 
                 return response()->json($data, 201);
-                dd('0');
             } elseif ($cekBarangMasuk > 1) {
                 $cekBarangMasuk = BarangMasuk::where('kode_barang', $barangMasuk->kode_barang)->first();
 
-                // jika kode barang yang diupdate sama dengan kode barang lama
-                // maka update data stok lama
+                // Jika kode barang yang diupdate sama dengan kode barang lama
                 if ($cekBarangMasuk->kode_barang == $request->kode_barang) {
+                    // Update stok lama
                     $stok = Stok::where('kode_barang', $request->kode_barang)->first();
                     $stok->stok_total -= $barangMasuk->jumlah;
                     $stok->stok_total += $request->jumlah;
@@ -160,6 +176,7 @@ class BarangMasukController extends Controller
                     $stok->sub_kategori = $request->sub_kategori;
                     $stok->save();
 
+                    // Update barang masuk
                     $barangMasuk->update($validatedData);
 
                     $barangMasukUpdate = BarangMasuk::find($id);
@@ -172,13 +189,13 @@ class BarangMasukController extends Controller
 
                     return response()->json($data, 200);
                 } else {
-                    // jika kode barang yang diupdate berbeda dengan kode barang lama
-                    // maka kurangi stok lama dan buat data stok baru
+                    // Jika kode barang berbeda, update stok lama dan buat stok baru
                     $stok = Stok::where('kode_barang', $barangMasuk->kode_barang)->first();
                     $stok->stok_total -= $barangMasuk->jumlah;
                     $stok->tanggal_update = now();
                     $stok->save();
 
+                    // Buat stok baru
                     Stok::create([
                         'kode_barang' => $request->kode_barang,
                         'nama' => $request->nama,
@@ -210,19 +227,23 @@ class BarangMasukController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus data barang masuk dan menyesuaikan stok.
      */
     public function destroy(string $id)
     {
         try {
+            // Ambil data barang masuk berdasarkan ID
             $barangMasuk = BarangMasuk::find($id);
+
+            // Hitung jumlah data barang masuk dengan kode barang yang sama
             $cekBarangMasuk = BarangMasuk::where('kode_barang', $barangMasuk->kode_barang)->count();
 
+            // Ambil data stok berdasarkan kode barang
             $stok = Stok::where('kode_barang', $barangMasuk->kode_barang)->first();
 
             if ($cekBarangMasuk == 1) {
-                // jika hanya 1 data barang masuk dengan kode barang yang sama
-                // maka hapus data stok juga
+                // Jika hanya ada 1 data barang masuk
+                // maka hapus stok dan data barang masuk
                 $stok->delete();
                 $barangMasuk->delete();
 
@@ -231,12 +252,13 @@ class BarangMasukController extends Controller
                     'message' => 'Delete Barang Masuk Success dan Stok Dihapus',
                 ];
             } else {
-                // jika lebih dari 1 data barang masuk dengan kode barang yang sama
+                // Jika ada lebih dari 1 data barang masuk
                 // maka kurangi stok sesuai jumlah barang masuk yang dihapus
                 $stok->stok_total -= $barangMasuk->jumlah;
                 $stok->tanggal_update = now();
                 $stok->save();
 
+                // Hapus data barang masuk
                 $barangMasuk->delete();
 
                 $data = [
@@ -247,6 +269,7 @@ class BarangMasukController extends Controller
 
             return response()->json($data, 200);
         } catch (\Throwable $th) {
+            // Tangani error jika terjadi kesalahan
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage(),

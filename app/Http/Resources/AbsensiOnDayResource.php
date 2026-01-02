@@ -15,13 +15,12 @@ class AbsensiOnDayResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'user' => $this->user->name,
-            'waktu_checkin' => $this->waktu_checkin,
-            'waktu_checkout' => $this->waktu_checkout,
-            // 'status' => $this->status === 'Menunggu Konfirmasi' ? '-' : $this->status,
-            'status' => $this->status,
-            'izin_sakit' => $this->image_proof ? $this->status : '-',
+            'id' => $this->id, // ID absensi pada hari tertentu
+            'user' => $this->user->name, // Nama pengguna yang melakukan absensi
+            'waktu_checkin' => $this->waktu_checkin, // Waktu pengguna melakukan check-in
+            'waktu_checkout' => $this->waktu_checkout, // Waktu pengguna melakukan check-out
+            'status' => $this->status, // Status absensi (misalnya: "Hadir", "Izin", "Sakit")
+            'izin_sakit' => $this->image_proof ? $this->status : '-', // Menyertakan bukti izin atau sakit jika ada
         ];
     }
 }

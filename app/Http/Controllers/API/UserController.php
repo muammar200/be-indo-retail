@@ -11,13 +11,21 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    /**
+     * Menampilkan daftar pengguna dengan pencarian dan pagination.
+     */
     public function index(Request $request)
     {
         $page = $request->input('page', 1);
         $perpage = $request->input('perpage', 10);
         $search = $request->input('search', '');
 
-        $users = User::latest()->where('name', 'LIKE', "%$search%")->orWhere('no_hp', 'LIKE', "%$search%")->orWhere('jabatan', 'LIKE', "%$search%")->paginate($perpage, ['*'], 'page', $page);
+        // Filter pencarian di kolom name, no_hp, dan jabatan
+        $users = User::latest()
+            ->where('name', 'LIKE', "%$search%")
+            ->orWhere('no_hp', 'LIKE', "%$search%")
+            ->orWhere('jabatan', 'LIKE', "%$search%")
+            ->paginate($perpage, ['*'], 'page', $page);
 
         $data = [
             'status' => true,
@@ -30,11 +38,12 @@ class UserController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan pengguna baru ke dalam database.
      */
     public function store(UserRequest $request)
     {
         try {
+            // Membuat pengguna baru dengan data yang sudah tervalidasi
             $user = User::create($request->validated());
 
             $data = [
@@ -53,7 +62,7 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan detail pengguna berdasarkan ID.
      */
     public function show(User $user)
     {
@@ -67,13 +76,13 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Mengupdate data pengguna yang sudah ada.
      */
     public function update(UserRequest $request, User $user)
     {
         try {
+            // Mengambil data yang tervalidasi dan memperbarui data pengguna
             $validatedData = $request->only(['name', 'no_hp', 'jabatan']);
-
             $user->update($validatedData);
 
             $data = [
@@ -92,11 +101,12 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus pengguna berdasarkan ID.
      */
     public function destroy(User $user)
     {
         try {
+            // Menghapus pengguna berdasarkan ID
             $user->delete();
 
             $data = [

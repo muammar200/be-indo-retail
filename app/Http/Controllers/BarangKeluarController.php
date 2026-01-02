@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class BarangKeluarController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar barang keluar dengan pencarian dan pagination.
      */
     public function index(Request $request)
     {
@@ -22,7 +22,16 @@ class BarangKeluarController extends Controller
         $perpage = $request->input('perpage', 10);
         $search = $request->input('search', '');
 
-        $barang_keluar = BarangKeluar::latest()->where('nama', 'LIKE', "%$search%")->orWhere('kode_barang', 'LIKE', "%$search%")->orWhere('harga', 'LIKE', "%$search%")->orWhere('jumlah', 'LIKE', "%$search%")->orWhere('sub_kategori', 'LIKE', "%$search%")->orWhere('tanggal_keluar', 'LIKE', "%$search%")->orWhere('toko_tujuan', 'LIKE', "%$search%")->paginate($perpage, ['*'], 'page', $page);
+        // Melakukan pencarian pada berbagai kolom
+        $barang_keluar = BarangKeluar::latest()
+            ->where('nama', 'LIKE', "%$search%")
+            ->orWhere('kode_barang', 'LIKE', "%$search%")
+            ->orWhere('harga', 'LIKE', "%$search%")
+            ->orWhere('jumlah', 'LIKE', "%$search%")
+            ->orWhere('sub_kategori', 'LIKE', "%$search%")
+            ->orWhere('tanggal_keluar', 'LIKE', "%$search%")
+            ->orWhere('toko_tujuan', 'LIKE', "%$search%")
+            ->paginate($perpage, ['*'], 'page', $page);
 
         $data = [
             'status' => true,
@@ -35,7 +44,7 @@ class BarangKeluarController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data barang keluar baru.
      */
     public function store(BarangKeluarRequest $request)
     {
@@ -43,16 +52,16 @@ class BarangKeluarController extends Controller
         $validatedData['tanggal_keluar'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_keluar'])->format('Y-m-d');
 
         try {
-            // Begin the transaction
+            // Memulai transaksi
             DB::beginTransaction();
 
-            // Find and update stock
+            // Menemukan dan mengupdate stok
             $stok = Stok::findOrFail($request->barang_id);
-            $stok->stok_total -= $request->jumlah;
+            $stok->stok_total -= $request->jumlah;  // Mengurangi stok
             $stok->tanggal_update = now();
             $stok->save();
 
-            // Create BarangKeluar
+            // Membuat record BarangKeluar
             $barangKeluar = BarangKeluar::create([
                 'kode_barang' => $stok->kode_barang,
                 'nama' => $stok->nama,
@@ -63,10 +72,9 @@ class BarangKeluarController extends Controller
                 'toko_tujuan' => $request->toko_tujuan,
             ]);
 
-            // Commit the transaction
+            // Commit transaksi
             DB::commit();
 
-            // Return success response
             $data = [
                 'status' => true,
                 'message' => 'Create Barang Keluar Success',
@@ -75,10 +83,9 @@ class BarangKeluarController extends Controller
 
             return response()->json($data, 201);
         } catch (\Throwable $th) {
-            // Rollback transaction on error
+            // Rollback transaksi jika terjadi error
             DB::rollBack();
 
-            // Return error response
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage(),
@@ -87,7 +94,7 @@ class BarangKeluarController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan data barang keluar berdasarkan ID.
      */
     public function show($id)
     {
@@ -102,29 +109,36 @@ class BarangKeluarController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Mengupdate data barang keluar.
      */
     public function update(BarangKeluarRequest $request, $id)
     {
         $barangKeluar = BarangKeluar::find($id);
         $validatedData = $request->validated();
         $validatedData['tanggal_keluar'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_keluar'])->format('Y-m-d');
+
         try {
+            // Memulai transaksi
             DB::beginTransaction();
+
+            // Menemukan stok berdasarkan kode barang dan mengupdate jumlahnya
             $stok = Stok::where('kode_barang', $barangKeluar->kode_barang)->first();
             if ($stok) {
+                // Mengembalikan stok sebelumnya
                 $stok->stok_total += $barangKeluar->jumlah;
                 $stok->stok_total -= $request->jumlah;
                 $stok->tanggal_update = now();
                 $stok->save();
             }
 
+            // Mengupdate BarangKeluar
             $barangKeluar->update([
                 'jumlah' => $request->jumlah,
                 'tanggal_keluar' => $validatedData['tanggal_keluar'],
                 'toko_tujuan' => $request->toko_tujuan,
             ]);
 
+            // Commit transaksi
             DB::commit();
 
             $data = [
@@ -135,6 +149,7 @@ class BarangKeluarController extends Controller
 
             return response()->json($data, 200);
         } catch (\Throwable $th) {
+            // Rollback transaksi jika terjadi error
             DB::rollBack();
 
             return response()->json([
@@ -145,14 +160,16 @@ class BarangKeluarController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus data barang keluar berdasarkan ID.
      */
     public function destroy($id)
     {
         $barangKeluar = BarangKeluar::find($id);
         try {
+            // Memulai transaksi
             DB::beginTransaction();
 
+            // Menemukan stok dan mengembalikan jumlah yang keluar
             $stok = Stok::where('kode_barang', $barangKeluar->kode_barang)->first();
             if ($stok) {
                 $stok->stok_total += $barangKeluar->jumlah;
@@ -160,7 +177,10 @@ class BarangKeluarController extends Controller
                 $stok->save();
             }
 
+            // Menghapus barang keluar
             $barangKeluar->delete();
+
+            // Commit transaksi
             DB::commit();
 
             return response()->json([
@@ -168,6 +188,7 @@ class BarangKeluarController extends Controller
                 'message' => 'Delete Barang Keluar Success',
             ], 200);
         } catch (\Throwable $th) {
+            // Rollback transaksi jika terjadi error
             DB::rollBack();
 
             return response()->json([

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class IzinSakitRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Tentukan apakah user diizinkan untuk melakukan request ini.
      */
     public function authorize(): bool
     {
@@ -15,19 +15,24 @@ class IzinSakitRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Mendapatkan aturan validasi yang berlaku pada request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'image_proof' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png'],
-            'keterangan' => ['nullable', 'string'],
-            'kategori' => ['required', 'in:Izin,Sakit'],
+            'image_proof' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png'], // Validasi file (wajib diisi, harus berupa file dan format yang valid)
+            'keterangan' => ['nullable', 'string'], // Keterangan bersifat opsional dan harus berupa string jika ada
+            'kategori' => ['required', 'in:Izin,Sakit'], // Kategori harus diisi dan hanya boleh 'Izin' atau 'Sakit'
         ];
     }
 
+    /**
+     * Mendapatkan pesan kesalahan validasi.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

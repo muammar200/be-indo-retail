@@ -15,10 +15,10 @@ class MetaPaginateResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'page' => $this->currentPage(),
-            'perpage' => $this->perPage(),
-            'total_page' => $this->lastPage(),
-            'total_item' => $this->total(),
+            'page' => $this->currentPage(),  // Menampilkan halaman saat ini
+            'perpage' => $this->perPage(),  // Menampilkan jumlah item per halaman
+            'total_page' => $this->lastPage(),  // Menampilkan jumlah total halaman
+            'total_item' => $this->total(),  // Menampilkan total item yang ada
         ];
     }
 }

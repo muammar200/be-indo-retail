@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class BarangKeluarRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Tentukan apakah user diizinkan untuk melakukan request ini.
      */
     public function authorize(): bool
     {
@@ -15,20 +15,25 @@ class BarangKeluarRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Mendapatkan aturan validasi yang berlaku pada request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'barang_id' => 'required|exists:stok,id',
-            'tanggal_keluar' => 'required|date_format:d-m-Y',
-            'toko_tujuan' => 'required|string',
-            'jumlah' => 'required|integer|min:1',
+            'barang_id' => 'required|exists:stok,id', // ID barang harus diisi dan ada di tabel stok
+            'tanggal_keluar' => 'required|date_format:d-m-Y', // Format tanggal keluar harus dd-mm-yyyy
+            'toko_tujuan' => 'required|string', // Toko tujuan harus diisi dan berupa teks
+            'jumlah' => 'required|integer|min:1', // Jumlah barang harus diisi, berupa angka bulat dan minimal 1
         ];
     }
 
+    /**
+     * Mendapatkan pesan kesalahan validasi.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

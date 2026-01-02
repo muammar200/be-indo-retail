@@ -16,16 +16,15 @@ class BarangKeluarResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'barang_id' => $this->stok->id,
-            'kode_barang' => $this->kode_barang,
-            'nama' => $this->nama,
-            'harga' => $this->harga,
-            'jumlah' => $this->jumlah,
-            'sub_kategori' => $this->sub_kategori,
-            // 'tanggal_keluar' => $this->tanggal_keluar,
-            'tanggal_keluar' => Carbon::parse($this->tanggal_keluar)->format('d-m-Y'),
-            'toko_tujuan' => $this->toko_tujuan,
+            'id' => $this->id, // ID Barang Keluar
+            'barang_id' => $this->stok->id, // ID dari stok yang terkait dengan barang keluar
+            'kode_barang' => $this->kode_barang, // Kode barang yang keluar
+            'nama' => $this->nama, // Nama barang yang keluar
+            'harga' => $this->harga, // Harga barang yang keluar
+            'jumlah' => $this->jumlah, // Jumlah barang yang keluar
+            'sub_kategori' => $this->sub_kategori, // Subkategori dari barang
+            'tanggal_keluar' => Carbon::parse($this->tanggal_keluar)->format('d-m-Y'), // Tanggal keluar barang, diformat ke dd-mm-yyyy
+            'toko_tujuan' => $this->toko_tujuan, // Nama toko tujuan barang keluar
         ];
     }
 }

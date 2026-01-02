@@ -17,12 +17,12 @@ class AbsensiRekapResource extends JsonResource
         static $incrementId = 1;
 
         return [
-            'id' => $incrementId++,
-            'nama' => $this->nama,
-            'jabatan' => $this->jabatan,
-            'hadir' => $this->hadir,
-            'izin' => $this->izin,
-            'sakit' => $this->sakit,
+            'id' => $incrementId++, // Menggunakan counter statis untuk ID unik
+            'nama' => $this->nama, // Nama karyawan
+            'jabatan' => $this->jabatan, // Jabatan karyawan
+            'hadir' => $this->hadir, // Status kehadiran (hadir)
+            'izin' => $this->izin, // Status izin
+            'sakit' => $this->sakit, // Status sakit
         ];
     }
 }

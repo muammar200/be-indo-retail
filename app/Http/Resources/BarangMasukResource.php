@@ -16,13 +16,13 @@ class BarangMasukResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'kode_barang' => $this->kode_barang,
-            'nama' => $this->nama,
-            'harga' => $this->harga,
-            'jumlah' => $this->jumlah,
-            'sub_kategori' => $this->sub_kategori,
-            'tanggal_masuk' => Carbon::parse($this->tanggal_masuk)->format('d-m-Y'),
+            'id' => $this->id, // ID Barang Masuk
+            'kode_barang' => $this->kode_barang, // Kode barang yang masuk
+            'nama' => $this->nama, // Nama barang yang masuk
+            'harga' => $this->harga, // Harga barang yang masuk
+            'jumlah' => $this->jumlah, // Jumlah barang yang masuk
+            'sub_kategori' => $this->sub_kategori, // Subkategori barang yang masuk
+            'tanggal_masuk' => Carbon::parse($this->tanggal_masuk)->format('d-m-Y'), // Tanggal masuk barang, diformat ke dd-mm-yyyy
         ];
     }
 }

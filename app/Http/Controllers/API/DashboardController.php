@@ -13,12 +13,25 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    /**
+     * Menampilkan ringkasan data dashboard.
+     * Mengambil total pengguna, absensi hari ini, stok barang, dan permintaan barang.
+     */
     public function dashboard()
     {
+        // Menghitung total user yang terdaftar
         $totalUser = User::count();
+
+        // Menghitung total absensi hari ini dengan status 'Hadir'
         $totalAbsensiHariIni = Absensi::where('tanggal', date('Y-m-d'))->where('status', 'Hadir')->count();
+
+        // Menghitung total stok barang yang ada
         $totalBarang = Stok::sum('stok_total');
+
+        // Menghitung total permintaan barang
         $totalPermintaanBarang = PermintaanBarang::sum('jumlah_permintaan');
+
+        // Menyiapkan data untuk dikirim sebagai response
         $data = [
             'totalAbsensiHariIni' => $totalAbsensiHariIni,
             'totalUser' => $totalUser,
@@ -32,10 +45,17 @@ class DashboardController extends Controller
             'data' => $data,
         ], 200);
     }
+
+    /**
+     * Menampilkan grafik data barang masuk dan keluar per bulan dalam tahun ini.
+     * Data ini digunakan untuk analisis tren barang masuk dan keluar.
+     */
     public function chart()
     {
+        // Menentukan tahun saat ini
         $year = date('Y');  
 
+        // Menyusun nama-nama bulan untuk grafik
         $bulan = [
             1 => 'Januari',
             2 => 'Februari',
@@ -51,45 +71,44 @@ class DashboardController extends Controller
             12 => 'Desember',
         ];
 
-        // BARANG MASUK
+        // Mengambil data barang masuk per bulan untuk tahun ini
         $dataBarangMasuk = BarangMasuk::selectRaw('MONTH(tanggal_masuk) as bulan, SUM(jumlah) as total_barang_masuk')
             ->whereYear('tanggal_masuk', '=', $year) 
             ->groupBy('bulan')
             ->get()
-            ->keyBy('bulan');
+            ->keyBy('bulan');  // Mengelompokkan hasil berdasarkan bulan
 
-
+        // Menyusun hasil barang masuk per bulan
         $resultBarangMasuk = [];
-
-
         foreach ($bulan as $bulanIndex => $bulanName) {
             $total = isset($dataBarangMasuk[$bulanIndex]) ? (int) $dataBarangMasuk[$bulanIndex]->total_barang_masuk : 0;  
-            $resultBarangMasuk[] = $total;
+            $resultBarangMasuk[] = $total; // Menambahkan data untuk grafik
         }
 
-        // BARANG KELUAR
+        // Mengambil data barang keluar per bulan untuk tahun ini
         $dataBarangKeluar = BarangKeluar::selectRaw('MONTH(tanggal_keluar) as bulan, SUM(jumlah) as total_barang_keluar')
             ->whereYear('tanggal_keluar', '=', $year)  
             ->groupBy('bulan')
             ->get()
-            ->keyBy('bulan'); 
+            ->keyBy('bulan'); // Mengelompokkan hasil berdasarkan bulan
 
+        // Menyusun hasil barang keluar per bulan
         $resultBarangKeluar = [];
-
         foreach ($bulan as $bulanIndex => $bulanName) {
             $totalBarangKeluar = isset($dataBarangKeluar[$bulanIndex]) ? (int) $dataBarangKeluar[$bulanIndex]->total_barang_keluar : 0;
-            $resultBarangKeluar[] = $totalBarangKeluar;
+            $resultBarangKeluar[] = $totalBarangKeluar; // Menambahkan data untuk grafik
         }
 
+        // Mengembalikan data dalam format JSON untuk ditampilkan pada grafik
         return response()->json([
-                [
-                    'name' => 'barangMasuk',
-                    'data' => $resultBarangMasuk,
-                ],
-                [
-                    'name' => 'barangKeluar',
-                    'data' => $resultBarangKeluar,
-                ],
-            ], 200);
+            [
+                'name' => 'barangMasuk',   // Data barang masuk
+                'data' => $resultBarangMasuk,
+            ],
+            [
+                'name' => 'barangKeluar',  // Data barang keluar
+                'data' => $resultBarangKeluar,
+            ],
+        ], 200);
     }
 }

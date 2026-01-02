@@ -16,11 +16,10 @@ class ClockInResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'user' => $this->user->name,
-            // 'tanggal' => $this->tanggal,
-            'tanggal' => Carbon::parse($this->tanggal)->format('d-m-Y'),
-            'status' => $this->status,
-            'waktu_checkin' => $this->waktu_checkin,
+            'user' => $this->user->name, // Mengambil nama pengguna yang melakukan check-in
+            'tanggal' => Carbon::parse($this->tanggal)->format('d-m-Y'), // Format tanggal check-in
+            'status' => $this->status, // Status check-in (misalnya: "Hadir", "Terlambat")
+            'waktu_checkin' => $this->waktu_checkin, // Waktu tepat check-in (misalnya: jam 08:00)
         ];
     }
 }

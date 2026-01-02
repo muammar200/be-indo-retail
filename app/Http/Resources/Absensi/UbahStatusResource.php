@@ -16,11 +16,10 @@ class UbahStatusResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'user' => $this->user->name,
-            // 'tanggal' => $this->tanggal,
-            'tanggal' => Carbon::parse($this->tanggal)->format('d-m-Y'),
-            'status' => $this->status,
+            'id' => $this->id, // ID perubahan status absensi
+            'user' => $this->user->name, // Nama pengguna yang status absensinya diubah
+            'tanggal' => Carbon::parse($this->tanggal)->format('d-m-Y'), // Tanggal perubahan status absensi
+            'status' => $this->status, // Status absensi (misalnya: "Hadir", "Izin", "Sakit")
         ];
     }
 }

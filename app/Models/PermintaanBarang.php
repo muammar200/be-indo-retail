@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class PermintaanBarang extends Model
 {
-    protected $table = 'permintaan_barang';
+    protected $table = 'permintaan_barang';  // Menentukan nama tabel yang digunakan untuk model ini, yaitu 'permintaan_barang'
 
-    protected $fillable = [
-        'nama_barang',
-        'tanggal_permintaan',
-        'jumlah_permintaan',
-        'modal',
-        'nomor_npwp',
+    protected $fillable = [  // Mendefinisikan kolom-kolom yang dapat diisi melalui mass assignment
+        'nama_barang',     // Nama barang yang diminta
+        'tanggal_permintaan',  // Tanggal permintaan barang
+        'jumlah_permintaan',   // Jumlah barang yang diminta
+        'modal',            // Modal yang diperlukan untuk permintaan barang
+        'nomor_npwp',       // Nomor NPWP yang terkait dengan permintaan barang
     ];
 }
+

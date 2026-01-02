@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 class PermintaanBarangController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar permintaan barang dengan fitur pencarian dan pagination.
      */
     public function index(Request $request)
     {
@@ -21,7 +21,14 @@ class PermintaanBarangController extends Controller
         $perpage = $request->input('perpage', 10);
         $search = $request->input('search', '');
 
-        $permintaan_barang = PermintaanBarang::latest()->where('nama_barang', 'LIKE', "%$search%")->orWhere('tanggal_permintaan', 'LIKE', "%$search%")->orWhere('jumlah_permintaan', 'LIKE', "%$search%")->orWhere('modal', 'LIKE', "%$search%")->orWhere('nomor_npwp', 'LIKE', "%$search%")->paginate($perpage, ['*'], 'page', $page);
+        // Menambahkan filter pencarian di berbagai kolom
+        $permintaan_barang = PermintaanBarang::latest()
+            ->where('nama_barang', 'LIKE', "%$search%")
+            ->orWhere('tanggal_permintaan', 'LIKE', "%$search%")
+            ->orWhere('jumlah_permintaan', 'LIKE', "%$search%")
+            ->orWhere('modal', 'LIKE', "%$search%")
+            ->orWhere('nomor_npwp', 'LIKE', "%$search%")
+            ->paginate($perpage, ['*'], 'page', $page);
 
         $data = [
             'status' => true,
@@ -34,14 +41,16 @@ class PermintaanBarangController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan permintaan barang baru.
      */
     public function store(PermintaanBarangRequest $request)
     {
+        // Validasi request dan format tanggal permintaan
         $validatedData = $request->validated();
         $validatedData['tanggal_permintaan'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_permintaan'])->format('Y-m-d');
-        try {
 
+        try {
+            // Membuat entri permintaan barang baru
             $permintaanBarang = PermintaanBarang::create($validatedData);
 
             $data = [
@@ -60,11 +69,20 @@ class PermintaanBarangController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan detail permintaan barang berdasarkan ID.
      */
     public function show($id)
     {
         $permintaanBarang = PermintaanBarang::find($id);
+
+        // Jika permintaan barang tidak ditemukan
+        if (! $permintaanBarang) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan Barang tidak ditemukan',
+            ], 404);
+        }
+
         $data = [
             'status' => true,
             'message' => 'Get Permintaan Barang by Id',
@@ -75,15 +93,25 @@ class PermintaanBarangController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Mengupdate permintaan barang berdasarkan ID.
      */
     public function update(PermintaanBarangRequest $request, $id)
     {
         $validatedData = $request->validated();
         $validatedData['tanggal_permintaan'] = Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_permintaan'])->format('Y-m-d');
-        $permintaanBarang = PermintaanBarang::find($id);
-        try {
 
+        $permintaanBarang = PermintaanBarang::find($id);
+
+        // Jika permintaan barang tidak ditemukan
+        if (! $permintaanBarang) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan Barang tidak ditemukan',
+            ], 404);
+        }
+
+        try {
+            // Melakukan update data permintaan barang
             $permintaanBarang->update($validatedData);
 
             $data = [
@@ -102,12 +130,22 @@ class PermintaanBarangController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus permintaan barang berdasarkan ID.
      */
     public function destroy($id)
     {
         $permintaanBarang = PermintaanBarang::find($id);
+
+        // Jika permintaan barang tidak ditemukan
+        if (! $permintaanBarang) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Permintaan Barang tidak ditemukan',
+            ], 404);
+        }
+
         try {
+            // Menghapus permintaan barang
             $permintaanBarang->delete();
 
             return response()->json([
@@ -122,8 +160,12 @@ class PermintaanBarangController extends Controller
         }
     }
 
+    /**
+     * Menampilkan seluruh data permintaan barang untuk dicetak.
+     */
     public function cetakPermintaanBarang()
     {
+        // Mengambil seluruh permintaan barang
         $data = PermintaanBarang::latest()->get();
 
         return response()->json([

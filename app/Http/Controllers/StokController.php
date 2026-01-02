@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 class StokController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar stok dengan pencarian dan paginasi.
      */
     public function index(Request $request)
     {
@@ -21,7 +21,15 @@ class StokController extends Controller
         $perpage = $request->input('perpage', 10);
         $search = $request->input('search', '');
 
-        $stok = Stok::latest()->where('nama', 'LIKE', "%$search%")->orWhere('kode_barang', 'LIKE', "%$search%")->orWhere('harga', 'LIKE', "%$search%")->orWhere('stok_awal', 'LIKE', "%$search%")->orWhere('stok_total', 'LIKE', "%$search%")->orWhere('tanggal_masuk', 'LIKE', "%$search%")->orWhere('tanggal_update', 'LIKE', "%$search%")->orWhere('sub_kategori', 'LIKE', "%$search%")->paginate($perpage, ['*'], 'page', $page);
+        $stok = Stok::latest()->where('nama', 'LIKE', "%$search%")
+            ->orWhere('kode_barang', 'LIKE', "%$search%")
+            ->orWhere('harga', 'LIKE', "%$search%")
+            ->orWhere('stok_awal', 'LIKE', "%$search%")
+            ->orWhere('stok_total', 'LIKE', "%$search%")
+            ->orWhere('tanggal_masuk', 'LIKE', "%$search%")
+            ->orWhere('tanggal_update', 'LIKE', "%$search%")
+            ->orWhere('sub_kategori', 'LIKE', "%$search%")
+            ->paginate($perpage, ['*'], 'page', $page);
 
         $data = [
             'status' => true,
@@ -33,6 +41,9 @@ class StokController extends Controller
         return response()->json($data, 200);
     }
 
+    /**
+     * Menampilkan semua stok tanpa paginasi, untuk dropdown misalnya.
+     */
     public function allStok()
     {
         $stok = Stok::latest()->get();
@@ -47,15 +58,7 @@ class StokController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
+     * Menampilkan stok berdasarkan ID.
      */
     public function show($id)
     {
@@ -70,21 +73,8 @@ class StokController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Menampilkan stok yang memiliki jumlah lebih dari 0 untuk dicetak.
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
     public function cetakStok()
     {
         $stok = Stok::where('stok_total', '>', 0)->get();
@@ -98,6 +88,9 @@ class StokController extends Controller
         return response()->json($data, 200);
     }
 
+    /**
+     * Menangani permintaan barang dengan validasi input.
+     */
     public function permintaanStok(Request $request)
     {
         $validatedData = $request->validate([
@@ -121,7 +114,6 @@ class StokController extends Controller
 
         $permintaanBarang = PermintaanBarang::create([
             'nama_barang' => Stok::find($validatedData['stok_id'])->nama,
-            // 'tanggal_permintaan' => $validatedData['tanggal_permintaan'],
             'tanggal_permintaan' => Carbon::createFromFormat('d-m-Y', $validatedData['tanggal_permintaan'])->format('Y-m-d'),
             'jumlah_permintaan' => $validatedData['jumlah_permintaan'],
             'modal' => $validatedData['modal'],

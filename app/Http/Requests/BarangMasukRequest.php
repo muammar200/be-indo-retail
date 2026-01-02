@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class BarangMasukRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Tentukan apakah user diizinkan untuk melakukan request ini.
      */
     public function authorize(): bool
     {
@@ -15,26 +15,28 @@ class BarangMasukRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Mendapatkan aturan validasi yang berlaku pada request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         $rules = [
-            'kode_barang' => 'required|string',
-            'nama' => 'required|string',
-            'harga' => 'required',
-            'jumlah' => 'required|integer',
-            'sub_kategori' => 'required|string',
-            'tanggal_masuk' => 'required|date_format:d-m-Y',
+            'kode_barang' => 'required|string', // Kode barang harus diisi dan berupa string
+            'nama' => 'required|string', // Nama barang harus diisi dan berupa string
+            'harga' => 'required', // Harga barang harus diisi
+            'jumlah' => 'required|integer', // Jumlah barang harus diisi dan berupa angka bulat
+            'sub_kategori' => 'required|string', // Sub kategori barang harus diisi dan berupa string
+            'tanggal_masuk' => 'required|date_format:d-m-Y', // Tanggal masuk barang harus diisi dengan format dd-mm-yyyy
         ];
 
         return $rules;
     }
 
     /**
-     * Get custom error messages.
+     * Mendapatkan pesan kesalahan validasi.
+     *
+     * @return array<string, string>
      */
     public function messages(): array
     {

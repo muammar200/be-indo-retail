@@ -16,11 +16,10 @@ class ClockOutResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'user' => $this->user->name,
-            // 'tanggal' => $this->tanggal,
-            'tanggal' => Carbon::parse($this->tanggal)->format('d-m-Y'),
-            'status' => $this->status,
-            'waktu_checkout' => $this->waktu_checkout,
+            'user' => $this->user->name, // Mengambil nama pengguna yang melakukan check-out
+            'tanggal' => Carbon::parse($this->tanggal)->format('d-m-Y'), // Format tanggal check-out
+            'status' => $this->status, // Status check-out (misalnya: "Pulang Tepat Waktu", "Terlambat")
+            'waktu_checkout' => $this->waktu_checkout, // Waktu tepat check-out (misalnya: jam 17:00)
         ];
     }
 }
