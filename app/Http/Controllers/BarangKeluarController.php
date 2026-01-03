@@ -55,9 +55,22 @@ class BarangKeluarController extends Controller
             // Memulai transaksi
             DB::beginTransaction();
 
-            // Menemukan dan mengupdate stok
+            // Menemukan stok barang berdasarkan ID
             $stok = Stok::findOrFail($request->barang_id);
-            $stok->stok_total -= $request->jumlah;  // Mengurangi stok
+
+            // Validasi jika jumlah yang keluar lebih besar dari stok yang tersedia
+            if ($request->jumlah > $stok->stok_total) {
+                // Rollback transaksi dan kirim pesan error
+                DB::rollBack();
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Jumlah barang yang dikeluarkan melebihi jumlah stok yang tersedia.',
+                ], 400); // Kode status 400 untuk Bad Request
+            }
+
+            // Mengurangi stok sesuai dengan jumlah yang dikeluarkan
+            $stok->stok_total -= $request->jumlah;
             $stok->tanggal_update = now();
             $stok->save();
 

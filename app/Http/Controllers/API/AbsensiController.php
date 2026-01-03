@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 
 class AbsensiController extends Controller
 {
-
     public function clockIn(Request $request)
     {
         // Ambil tanggal dan waktu dari request
@@ -36,7 +35,7 @@ class AbsensiController extends Controller
         // Mengonversi tanggal dari format YYYY-DD-MM ke YYYY-MM-DD
         try {
             // Pecah tanggal yang dikirim (YYYY-DD-MM) menjadi komponen tanggal
-            [$tahun, $hari, $bulan] = explode('-', $tanggal);
+            // [$tahun, $hari, $bulan] = explode('-', $tanggal);
 
             // Buat objek Carbon dari tanggal yang sudah diperbaiki menjadi format YYYY-MM-DD
             $formattedDate = $tanggal;
@@ -72,6 +71,13 @@ class AbsensiController extends Controller
             // Menghitung jarak untuk absensi berdasarkan latitude dan longitude
             $userLatitude = $request->input('latitude');
             $userLongitude = $request->input('longitude');
+
+            if (empty($userLatitude) || empty($userLongitude)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Akses lokasi harus diaktifkan.',
+                ], 400);
+            }
 
             // Koordinat kantor
             $officeLatitude = -5.2052646;
@@ -135,7 +141,7 @@ class AbsensiController extends Controller
         // Mengonversi tanggal dari format YYYY-DD-MM ke YYYY-MM-DD
         try {
             // Pecah tanggal yang dikirim (YYYY-DD-MM) menjadi komponen tanggal
-            [$tahun, $hari, $bulan] = explode('-', $tanggal);
+            // [$tahun, $hari, $bulan] = explode('-', $tanggal);
 
             // Buat objek Carbon dari tanggal yang sudah diperbaiki menjadi format YYYY-MM-DD
             $formattedDate = $tanggal;
@@ -186,6 +192,13 @@ class AbsensiController extends Controller
 
             $userLatitude = $request->input('latitude');
             $userLongitude = $request->input('longitude');
+
+            if (empty($userLatitude) || empty($userLongitude)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Akses lokasi harus diaktifkan.',
+                ], 400);
+            }
 
             // Koordinat kantor
             $officeLatitude = -5.2052646;
@@ -244,9 +257,8 @@ class AbsensiController extends Controller
                 'user_id' => $request->user()->id,
                 'tanggal' => date('Y-m-d'),
                 'status' => 'Menunggu Konfirmasi',
-                'kategori' =>  $request->kategori
+                'kategori' => $request->kategori,
             ];
-            
 
             // Menambahkan keterangan jika ada
             if ($request->keterangan) {
@@ -264,7 +276,7 @@ class AbsensiController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'Bukti ' . $request->kategori .  ' Berhasil Dikirim',
+                'message' => 'Bukti '.$request->kategori.' Berhasil Dikirim',
             ], 201);
 
         } catch (\Throwable $th) {
