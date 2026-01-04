@@ -85,7 +85,7 @@ Route::middleware(['auth:api'])->prefix('admin')->group(function () {
     // });
     // Route::middleware(['auth:api', 'jabatan:Pimpinan,Staff'])->group(function () {
         Route::post('/barangMasuk', [BarangMasukController::class, 'store']);
-        Route::patch('/barangMasuk/{id}', [BarangMasukController::class, 'update']);
+        Route::put('/barangMasuk/{id}', [BarangMasukController::class, 'update']);
         Route::delete('/barangMasuk/{id}', [BarangMasukController::class, 'destroy']);
     // });
 
