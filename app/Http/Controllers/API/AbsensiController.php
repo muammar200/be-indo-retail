@@ -69,8 +69,10 @@ class AbsensiController extends Controller
             $status = Carbon::createFromFormat('Y-m-d H:i:s', $tanggalWaktu)->format('H:i:s') <= $jamKerja ? 'Hadir' : 'Terlambat';
 
             // Menghitung jarak untuk absensi berdasarkan latitude dan longitude
-            $userLatitude = $request->input('latitude');
-            $userLongitude = $request->input('longitude');
+            // $userLatitude = $request->input('latitude');
+            // $userLongitude = $request->input('longitude');
+            $userLatitude = floatval($request->input('latitude'));
+            $userLongitude = floatval($request->input('longitude'));
 
             if (empty($userLatitude) || empty($userLongitude)) {
                 return response()->json([
@@ -190,8 +192,10 @@ class AbsensiController extends Controller
                 ], 400);
             }
 
-            $userLatitude = $request->input('latitude');
-            $userLongitude = $request->input('longitude');
+            // $userLatitude = $request->input('latitude');
+            // $userLongitude = $request->input('longitude');
+            $userLatitude = floatval($request->input('latitude'));
+            $userLongitude = floatval($request->input('longitude'));
 
             if (empty($userLatitude) || empty($userLongitude)) {
                 return response()->json([
