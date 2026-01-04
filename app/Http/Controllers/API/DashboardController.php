@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $totalUser = User::count();
 
         // Menghitung total absensi hari ini dengan status 'Hadir'
-        $totalAbsensiHariIni = Absensi::where('tanggal', date('Y-m-d'))->where('status', 'Hadir')->count();
+        $totalAbsensiHariIni = Absensi::where('tanggal', date('Y-m-d'))->count();
 
         // Menghitung total stok barang yang ada
         $totalBarang = Stok::sum('stok_total');
