@@ -14,22 +14,22 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::create([
-        //     'name' => 'Alif',
-        //     'no_hp' => '082192789513',
-        //     'jabatan' => 'Pimpinan',
-        //     'password' => 'password'
-        // ]);
-        $faker = Faker::create();
+        User::create([
+            'name' => 'Alif',
+            'no_hp' => '6289652558065',
+            'jabatan' => 'Pimpinan',
+            'password' => 'password'
+        ]);
+        // $faker = Faker::create();
 
-        for ($i = 105; $i < 150; $i++) {
-            // Membuat data user menggunakan faker
-            User::create([
-                'name' => $faker->name,
-                'no_hp' => $faker->phoneNumber,
-                'jabatan' => $faker->randomElement(['Pimpinan', 'Staff', 'Karyawan Pelapor', 'Karyawan Biasa']),
-                'password' => 'password',
-            ]);
-        }
+        // for ($i = 105; $i < 150; $i++) {
+        //     // Membuat data user menggunakan faker
+        //     User::create([
+        //         'name' => $faker->name,
+        //         'no_hp' => $faker->phoneNumber,
+        //         'jabatan' => $faker->randomElement(['Pimpinan', 'Staff', 'Karyawan Pelapor', 'Karyawan Biasa']),
+        //         'password' => 'password',
+        //     ]);
+        // }
     }
 }
